@@ -1,0 +1,142 @@
+<div class="container mt-5" id="main-container">
+    <div class="container-fluid">
+        @if(errorMessage){
+            <p class="text-danger">{{ errorMessage }}</p>
+        }
+
+        @if(condominiums && condominiums.length > 0){
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Indirizzo</th>
+                        <th scope="col">Numero Appartamenti</th>
+                        <th scope="col">Saldo Anno Precedente</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(condominium of condominiums; track condominium.name; let idx = $index){
+                    <tr>
+                        <td>{{condominium.name}}</td>
+                        <td>{{condominium.address}}</td>
+                        <td>{{condominium.apartments?.length}}</td>
+                        <td>{{condominium.lastYearBalance}}</td>
+                        <td><a class="btn btn-success" [routerLink]="['/preventivi', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
+                        <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCondominium" (click)="onOpenEditCondominiumModal(condominium)">Modifica</button></td>
+                        <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCondominium" (click)="onOpenDeleteCondominiumModal(condominium)">Elimina</button></td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if(!condominiums || condominiums.length === 0 && !errorMessage){
+            <h3>Nessun condominio disponibile</h3>
+        }
+
+        <div class="text-center mt-5">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCondominium" >Aggiungi Condominio</button>
+        </div>
+    </div>
+
+
+    <!-- Add Condominium Modal -->
+    <div class="modal fade" id="addCondominium" tabindex="-1" aria-labelledby="addCondominiumLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addCondominiumLabel">Aggiungi Condominio</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="addForm" (ngSubmit)="onAddCondominium()">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nome Condominio</label>
+                    <input type="text" class="form-control" id="name" formControlName="name">
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Indirizzo</label>
+                    <input type="text" class="form-control" id="address" formControlName="address">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="address" class="form-label">Saldo Anno Precedente</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control" id="lastYearBalance" formControlName="lastYearBalance">
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="add-condominiumForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-success" [disabled]="addForm.invalid">Crea</button>
+                </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    <!-- Edit Condominium Modal -->
+    <div class="modal fade" id="editCondominium" tabindex="-1" aria-labelledby="editCondominiumLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="editCondominiumLabel">Modifica Condominio</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="editForm" (ngSubmit)="onUpdateCondominium()">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome Condominio</label>
+                        <input type="hidden" class="form-control" id="id" formControlName="id">
+                        <input type="text" class="form-control" id="name" formControlName="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Indirizzo</label>
+                        <input type="text" class="form-control" id="address" formControlName="address">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Saldo Anno Precedente</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" class="form-control" id="lastYearBalance" formControlName="lastYearBalance">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" id="edit-condominiumForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#prova" >Aggiungi Condominio</button>
+                        <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Salva</button>
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Delete Condominium Modal -->
+     <div class="modal fade" id="deleteCondominium" tabindex="-1" aria-labelledby="deleteCondominiumLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteCondominiumLabel">Aggiungi Condominio</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p>Sei sicuro di voler eliminare il condominio {{deleteCondominium?.name}}?</p>
+               <div class="modal-footer">
+                <button type="button" id="delete-condominiumForm" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-danger" (click)="onDeleteCondominium(deleteCondominium?.id)">Elimina</button>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+<router-outlet></router-outlet>
