@@ -19,9 +19,11 @@ public class TableAppendix {
     private Long id;
 
     @NotEmpty(message = "La tabella dovrebbe avere classificare una serire di spese")
+    @Column(name = "category", nullable = false)
     private String category;
 
     @NotEmpty(message = "La tabella dovrebbe avere una descrizione")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @OneToOne(mappedBy = "table", cascade = CascadeType.ALL)

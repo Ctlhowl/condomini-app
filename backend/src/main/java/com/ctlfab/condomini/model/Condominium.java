@@ -17,11 +17,16 @@ public class Condominium {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotEmpty(message = "Il condominio dovrebbe avere un nome")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @NotEmpty(message = "Il condominio dovrebbe avere un indirizzo")
+    @Column(name = "address", nullable = false)
     private String address;
+
+    @Column(name = "last_year_balance", nullable = false)
     private float lastYearBalance;
 
     @OneToMany(mappedBy = "condominium", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)

@@ -24,27 +24,33 @@ public class Outlay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "La spesa dovrebbe essere in Entrata  o Uscita")
-    private OperationType operationType;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Timestamp created_at;
-
     @DecimalMin(value = "0.00", message = "La spesa dovrebbe avere un importo")
+    @Column(name = "amount", nullable = false)
     private float amount;
 
     @NotEmpty(message = "La spesa dovrebbe avere una descrizione")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "La spesa dovrebbe un metodo di pagamento")
-    private PaymentMethod paymentMethod;
+    @NotNull(message = "La spesa dovrebbe essere in Ordinaria o Straordinaria")
+    @Column(name = "outlay_type", nullable = false)
+    private OutlayType outlayType;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "La spesa dovrebbe essere in Ordinaria o Straordinaria")
-    private OutlayType outlayType;
+    @NotNull(message = "La spesa dovrebbe essere in Entrata  o Uscita")
+    @Column(name = "operation_type", nullable = false)
+    private OperationType operationType;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "La spesa dovrebbe un metodo di pagamento")
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
+    
 
     @ManyToOne
     @JoinColumn(name = "table_id")
@@ -52,7 +58,7 @@ public class Outlay {
     private TableAppendix table;
 
     @ManyToOne
-    @JoinColumn(name = "appartament_id")
+    @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
     @ManyToOne
@@ -64,7 +70,7 @@ public class Outlay {
         return "Outlay{" +
                 "id=" + id +
                 ", operationType=" + operationType +
-                ", created_at=" + created_at +
+                ", created_at=" + createdAt +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
                 ", paymentMethod=" + paymentMethod +

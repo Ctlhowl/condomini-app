@@ -57,7 +57,6 @@ public class ReportServiceImpl implements ReportService {
 
         return Report.builder()
                 .id(reportDTO.getId())
-                .name(reportDTO.getName())
                 .path_file(reportDTO.getPathFile())
                 .created_at(reportDTO.getCreated_at())
                 .condominium(condominium)
@@ -67,7 +66,6 @@ public class ReportServiceImpl implements ReportService {
     private ReportDTO mapEntityToDTO(Report report) {
         return ReportDTO.builder()
                 .id(report.getId())
-                .name(report.getName())
                 .pathFile(report.getPath_file())
                 .created_at(report.getCreated_at())
                 .build();

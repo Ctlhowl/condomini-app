@@ -21,27 +21,24 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "Il file report dovrebbe avere un nome")
-    private String name;
-
     @NotEmpty(message = "Il file report dovrebbe avere un path")
+    @Column(name = "path_file", nullable = false)
     private String path_file;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Timestamp created_at;
 
     @ManyToOne
     @JoinColumn(name = "condominium_id")
     @NotNull(message = "Il report dovrebbe avere un condominio associato")
     private Condominium condominium;
 
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp created_at;
+
     @Override
     public String toString() {
         return "Report{" +
                 "created_at=" + created_at +
                 ", path_file='" + path_file + '\'' +
-                ", name='" + name + '\'' +
                 ", id=" + id +
                 '}';
     }

@@ -48,18 +48,6 @@ public class OutlayServiceImpl implements OutlayService {
     }
 
     @Override
-    public List<OutlayDTO> findCondominiumOutlaysByCondominiumId(Long condominiumId) {
-        logger.info("Fetching condominium outlays by condominium ID: {}", condominiumId);
-        List<OutlayDTO> outlays = new LinkedList<>();
-
-        for(Outlay outlay : outlayRepository.findCondominiumOutlaysByCondominiumId(condominiumId)){
-            outlays.add(mapEntityToDTO(outlay));
-        }
-
-        return outlays;
-    }
-
-    @Override
     public List<OutlayDTO> findAllOutlaysByCondominiumId(Long condominiumId) {
         logger.info("Fetching all outlays by condominium ID: {}", condominiumId);
         List<OutlayDTO> outlays = new LinkedList<>();
@@ -101,7 +89,7 @@ public class OutlayServiceImpl implements OutlayService {
         return OutlayDTO.builder()
                 .id(outlay.getId())
                 .amount(outlay.getAmount())
-                .created_at(outlay.getCreated_at())
+                .created_at(outlay.getCreatedAt())
                 .description(outlay.getDescription())
                 .operationType(outlay.getOperationType())
                 .outlayType(outlay.getOutlayType())
@@ -118,7 +106,7 @@ public class OutlayServiceImpl implements OutlayService {
         return Outlay.builder()
                 .id(outlayDTO.getId())
                 .amount(outlayDTO.getAmount())
-                .created_at(outlayDTO.getCreated_at())
+                .createdAt(outlayDTO.getCreated_at())
                 .description(outlayDTO.getDescription())
                 .operationType(outlayDTO.getOperationType())
                 .outlayType(outlayDTO.getOutlayType())

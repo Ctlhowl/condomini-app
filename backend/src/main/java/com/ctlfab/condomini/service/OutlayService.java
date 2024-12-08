@@ -8,7 +8,6 @@ import java.util.List;
 public interface OutlayService {
 
     List<OutlayDTO> findApartmentOutlaysByApartmentId(Long apartmentId);
-    List<OutlayDTO> findCondominiumOutlaysByCondominiumId(Long condominiumId);
     List<OutlayDTO> findAllOutlaysByCondominiumId(Long condominiumId);
     OutlayDTO saveOutlay(OutlayDTO outlayDTO, Long condominiumId, Long apartmentId, Long id);
     OutlayDTO updateOutlay(OutlayDTO outlayDTO, Long condominiumId, Long apartmentId, Long id);

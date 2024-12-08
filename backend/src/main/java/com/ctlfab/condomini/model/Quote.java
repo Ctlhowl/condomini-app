@@ -22,20 +22,22 @@ public class Quote {
     private Long id;
 
     @DecimalMin(value = "0.00", message = "Il preventivo dovrebbe avere un importo")
+    @Column(name = "total_amount", nullable = false)
     private float totalAmount;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Timestamp createdAt;
 
     @OneToOne
     @NotNull(message = "Il preventivo dovrebbe essere associato ad una tabella di riferimento")
+    @JoinColumn(name = "table_id", nullable = false)
     private TableAppendix table;
 
     @ManyToOne
     @JoinColumn(name = "condominium_id", nullable = false)
     @NotNull(message = "Il preventivo dovrebbe essere associato ad un condominio")
     private Condominium condominium;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
 
     @Override
     public String toString() {
