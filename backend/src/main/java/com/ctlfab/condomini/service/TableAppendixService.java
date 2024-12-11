@@ -6,6 +6,5 @@ import java.util.Collection;
 
 public interface TableAppendixService {
     TableAppendixDTO findTableById(Long tableId);
-    Collection<TableAppendixDTO> findTableByCategory(String category);
     Collection<TableAppendixDTO> findAll();
 }

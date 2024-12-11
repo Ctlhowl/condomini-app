@@ -5,6 +5,7 @@ import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.OutlayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+@Slf4j
 @RestController
 @RequestMapping("/condominium/{condominiumId}/outlay")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -23,7 +25,7 @@ public class OutlayController {
 
 
     @GetMapping("/list")
-    public ResponseEntity<Response> getOutlays(@PathVariable(value = "condominiumId") long condominiumId) {
+    public ResponseEntity<Response> getCondominiumOutlays(@PathVariable(value = "condominiumId") long condominiumId) {
         return  ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())
@@ -40,6 +42,7 @@ public class OutlayController {
                                               @RequestParam(value = "apartmentId", required = false) Long apartmentId,
                                               @Valid @RequestBody OutlayDTO outlayDTO) {
 
+        log.info("payload {}", outlayDTO);
         return ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())

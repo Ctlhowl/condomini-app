@@ -35,18 +35,6 @@ public class TableAppendixServiceImpl implements TableAppendixService {
     }
 
     @Override
-    public Collection<TableAppendixDTO> findTableByCategory(String category) {
-        logger.info("Fetching tables by Category: {}", category);
-        Collection<TableAppendixDTO> tables = new LinkedList<>();
-
-        for (TableAppendix table : tableAppendixRepository.findTablebyCategories(category)) {
-            tables.add(mapEntityToDTO(table));
-        }
-        return tables;
-
-    }
-
-    @Override
     public Collection<TableAppendixDTO> findAll() {
         logger.info("Fetching all tables");
         Collection<TableAppendixDTO> tables = new LinkedList<>();

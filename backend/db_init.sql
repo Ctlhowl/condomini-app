@@ -55,19 +55,15 @@ CREATE TABLE condomini_app.quote(
 );
 
 
-CREATE TYPE condomini_app.outlay_type AS ENUM ('Entrata', 'Uscita');
-CREATE TYPE condomini_app.operation_type AS ENUM ('Ordinaria', 'Straordinaria');
-CREATE TYPE condomini_app.payment_method AS ENUM ('Contanti', 'Banca');
-
 CREATE TABLE condomini_app.outlay(
     id SERIAL PRIMARY KEY,
     amount REAL NOT NULL DEFAULT 0,
     description VARCHAR(255) NOT null,
-    outlay_type outlay_type NOT NULL,
-    operation_type operation_type NOT NULL,
-    payment_method payment_method NOT NULL,
+    outlay_type VARCHAR(255) NOT NULL,
+    operation_type VARCHAR(255) NOT NULL,
+    payment_method VARCHAR(255) NOT NULL,
     condominium_id INTEGER NOT NULL,
-    apartment_id INTEGER NOT NULL,
+    apartment_id INTEGER,
     table_id INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 

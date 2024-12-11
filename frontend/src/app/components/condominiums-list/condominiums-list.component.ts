@@ -25,20 +25,28 @@ export class CondominiumsListComponent implements OnInit {
   constructor(private condominiumService: CondominiumService) {  }
   
   ngOnInit(): void {
+    this.condominiumService.clearSelectedCondominium();
+
+    this.createAddForm();
+    this.createEditForm();
+    this.getCondominiums();
+  }
+
+  private createAddForm() {
     this.addForm = new FormGroup({
       name: new FormControl(null, Validators.required),
       address: new FormControl(null, Validators.required),
       lastYearBalance: new FormControl(null, Validators.required)
     });
+  }
 
+  private createEditForm() {
     this.editForm = new FormGroup({
       id: new FormControl(null, Validators.required),
       name: new FormControl(null, Validators.required),
       address: new FormControl(null, Validators.required),
       lastYearBalance: new FormControl(null, Validators.required)
     });
-
-    this.getCondominiums();
   }
 
   private getCondominiums(): void {
@@ -53,13 +61,10 @@ export class CondominiumsListComponent implements OnInit {
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to load condominium';
-        },
-        complete: () => {
-          console.log('Request completed');
         }
       });
   }
-  
+
   public onOpenEditCondominiumModal(condominium: Condominium) {
     this.editForm.get('id')?.setValue(condominium.id);
     this.editForm.get('name')?.setValue(condominium.name);
@@ -67,30 +72,32 @@ export class CondominiumsListComponent implements OnInit {
     this.editForm.get('lastYearBalance')?.setValue(condominium.lastYearBalance)
   }
 
-  public onOpenDeleteCondominiumModal(condominium: Condominium) {
-    this.deleteCondominium = condominium;
-  }
-
-
   public onAddCondominium(): void{
     document.getElementById('add-condominiumForm')?.click();
     
     this.condominiumService.addCondominium(this.addForm.value).subscribe(
-      () => {this.getCondominiums();}
-    );
-  }
-
-  public onUpdateCondominium(): void{
-    document.getElementById('edit-condominiumForm')?.click();
-
-    this.condominiumService.addCondominium(this.editForm.value).subscribe(
-      (response: ApiResponse<Condominium>) => {
-        console.log(response.data)
+      () => {
+        this.createAddForm()
         this.getCondominiums();
       }
     );
   }
 
+
+  public onUpdateCondominium(): void{
+    document.getElementById('edit-condominiumForm')?.click();
+
+    this.condominiumService.updateCondominium(this.editForm.value).subscribe(
+      () => {
+        this.createEditForm();
+        this.getCondominiums();
+      }
+    );
+  }
+
+  public onOpenDeleteCondominiumModal(condominium: Condominium) {
+    this.deleteCondominium = condominium;
+  }
 
   public onDeleteCondominium(condominiumId: number | undefined = -1): void{
     document.getElementById('delete-condominiumForm')?.click();

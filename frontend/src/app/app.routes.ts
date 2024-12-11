@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
 import { CondominiumsListComponent } from './components/condominiums-list/condominiums-list.component';
-import { CondominiumDetailsComponent } from './components/condominium-details/condominium-details.component';
 import { QuotesComponent } from './components/quotes/quotes.component';
+import { CondominiumOutlayComponent } from './components/condominium-outlay/condominium-outlay.component';
 
 export const routes: Routes = [
     { path: '', component: CondominiumsListComponent },
-    { path: 'preventivi/:id', component: QuotesComponent}
+    { path: 'quotes/:id', component: QuotesComponent },
+    { path: 'condominium/outlay/:id', component: CondominiumOutlayComponent}
 ];
     
 export class AppRoutingModule {}

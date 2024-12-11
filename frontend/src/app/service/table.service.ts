@@ -17,7 +17,7 @@ export class TableService {
     return this.http.get<ApiResponse<TableAppendix []>>(`${this.apiServerUrl}/list`);
   }
 
-  public getTablesByCategory(categoty: string): Observable<ApiResponse<TableAppendix[]>> {
-    return this.http.get<ApiResponse<TableAppendix[]>>(`${this.apiServerUrl}/details`, {params: {id: categoty}});
+  public getTableById(tableId: number): Observable<ApiResponse<TableAppendix>> {
+    return this.http.get<ApiResponse<TableAppendix>>(`${this.apiServerUrl}/details`, {params: {id: tableId}});
   }
 }

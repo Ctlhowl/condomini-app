@@ -1,0 +1,204 @@
+<div class="container mt-5" id="main-container">
+    <div class="container-fluid">
+        @if(errorMessage){
+            <p class="text-danger">{{ errorMessage }}</p>
+        }
+
+        @if(outlays && outlays.length > 0){
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Descrizione</th>
+                        <th scope="col">Importo</th>
+                        <th scope="col">Tipo Operazione</th>
+                        <th scope="col">Tipo Pagamento</th>
+                        <th scope="col">Tipo Spesa</th>
+                        <th scope="col">Tabella</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(outlay of outlays; track $index){
+                    <tr>
+                        <td>{{outlay.created_at.split('T')[0]}}</td>
+                        <td>{{outlay.description}}</td>
+                        <td>€ {{outlay.amount}} </td>
+                        <td>{{outlay.operationType}}</td>
+                        <td>{{outlay.paymentMethod}}</td>
+                        <td>{{outlay.outlayType}}</td>
+                        <td>{{outlay.table.category}} - {{outlay.table.description}}</td>
+                        <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editOutlay"  (click)="onOpenEditOutlayModal(outlay)">Modifica</button></td>
+                        <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOutlay" (click)="onOpenDeleteOutlayModal(outlay)">Elimina</button></td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if(!outlays || outlays.length === 0 && !errorMessage){
+            <h3>Nessuna Spesa Condominiale Effettuata</h3>
+        }
+
+        <div class="text-center mt-5">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addOutlay" >Aggiungi Spesa Condominiale</button>
+        </div>
+    </div>
+
+    <!-- Add Outlay Modal -->
+    <div class="modal fade" id="addOutlay" tabindex="-1" aria-labelledby="addOutlayLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addOutlayLabel">Aggiungi Spesa Condominiale</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="addForm" (ngSubmit)="onAddOutlay()">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="description" class="form-label">Descrizione Spesa</label>
+                        <input type="text" class="form-control" id="description" formControlName="description">
+                    </div>
+                    <div class="col">
+                        <label for="amount" class="form-label">Importo Spesa</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" class="form-control" id="amount" formControlName="amount">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="operationType" class="form-label">Tipo Operazione</label>
+                        <select class="form-select" id="operationType" formControlName="operationType">
+                            <option value="ENTRATA" selected>ENTRATA</option>
+                            <option value="USCITA">USCITA</option>
+                        </select>  
+                    </div>
+                    <div class="col">
+                        <label for="paymentMethod" class="form-label">Tipo Pagamento</label>
+                        <select class="form-select" id="paymentMethod" formControlName="paymentMethod">
+                            <option value="BANCA" selected>BANCA</option>
+                            <option value="CONTANTI">CONTANTI</option>
+                        </select>   
+                    </div>
+                    <div class="col">
+                        <label for="outlayType" class="form-label">Tipo Spesa</label>
+                        <select class="form-select" id="outlayType" formControlName="outlayType">
+                            <option value="ORDINARIA" selected>ORDINARIA</option>
+                            <option value="STRAORDINARIA">STRAORDINARIA</option>
+                        </select>   
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="table" class="form-label">Tabella Di Riferimento</label>
+                        <select class="form-select" id="table" formControlName="table">
+                            @for (table of tables; track $index) {
+                                <option [ngValue]="table">{{table.category}} - {{table.description}}</option>
+                            }
+                        </select>  
+                    </div>
+                </div>
+                                
+                <div class="modal-footer">
+                    <button type="button" id="add-outlayForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-success" [disabled]="addForm.invalid">Crea</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Outlay Modal -->
+    <div class="modal fade" id="editOutlay" tabindex="-1" aria-labelledby="editOutlayLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editOutlayLabel">Modifica Spesa Condominiale</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="editForm" (ngSubmit)="onUpdateOutlay()">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="description" class="form-label">Descrizione Spesa</label>
+                        <input type="hidden" class="form-control" id="id" formControlName="id">
+                        <input type="text" class="form-control" id="description" formControlName="description">
+                    </div>
+                    <div class="col">
+                        <label for="amount" class="form-label">Importo Spesa</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" class="form-control" id="amount" formControlName="amount">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="operationType" class="form-label">Tipo Operazione</label>
+                        <select class="form-select" id="operationType" formControlName="operationType">
+                            <option value="ENTRATA" selected>ENTRATA</option>
+                            <option value="USCITA">USCITA</option>
+                        </select>  
+                    </div>
+                    <div class="col">
+                        <label for="paymentMethod" class="form-label">Tipo Pagamento</label>
+                        <select class="form-select" id="paymentMethod" formControlName="paymentMethod">
+                            <option value="BANCA" selected>BANCA</option>
+                            <option value="CONTANTI">CONTANTI</option>
+                        </select>   
+                    </div>
+                    <div class="col">
+                        <label for="outlayType" class="form-label">Tipo Spesa</label>
+                        <select class="form-select" id="outlayType" formControlName="outlayType">
+                            <option value="ORDINARIA" selected>ORDINARIA</option>
+                            <option value="STRAORDINARIA">STRAORDINARIA</option>
+                        </select>   
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="table" class="form-label">Tabella Di Riferimento</label>
+                        <select class="form-select" id="table" formControlName="table">
+                            @for (table of tables; track $index) {
+                                <option [ngValue]="table">{{table.category}} - {{table.description}}</option>
+                            }
+                        </select>  
+                    </div>
+                </div>
+                                
+                <div class="modal-footer">
+                    <button type="button" id="edit-outlayForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Salva</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Outlay Modal -->
+    <div class="modal fade" id="deleteOutlay" tabindex="-1" aria-labelledby="deleteOutlayLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteOutlayLabel">Elimina Spesa Condominiale</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p>Sei sicuro di voler eliminare la spesa {{deleteOutlay?.description}}?</p>
+               <div class="modal-footer">
+                <button type="button" id="delete-outlayForm" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-danger" (click)="onDeleteOutlay(deleteOutlay?.id)">Elimina</button>
+               </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<router-outlet></router-outlet>

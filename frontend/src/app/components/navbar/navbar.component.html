@@ -1,18 +1,22 @@
 <nav class="navbar navbar-expand-lg  bg-dark" data-bs-theme="dark">
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNav">
+            @if(!selectedCondominiumId){
             <a class="navbar-brand">Gestione Condomini - Giorgio Ciotola</a>
+            }
+
             @if(selectedCondominiumId){
+                <a class="navbar-brand" [routerLink]="['']" routerLinkActive="router-link-active">Cambia Condominio</a>
                 <span class="space"></span>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Gestione Condominio</a>
+                        <a class="nav-link" [routerLink]="['/condominium/outlay', selectedCondominiumId]" routerLinkActive="router-link-active">Gestione Condominio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Gestione Appartamenti</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" [routerLink]="['/preventivi', selectedCondominiumId]" routerLinkActive="router-link-active" >Preventivi</a>
+                        <a class="nav-link" [routerLink]="['/quotes', selectedCondominiumId]" routerLinkActive="router-link-active" >Preventivi</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Report</a>

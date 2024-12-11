@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
-import { TableAppendix } from '../../interface/table-appendix';
 import { TableService } from '../../service/table.service';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { CondominiumService } from '../../service/condominium.service';
 import { ApiResponse } from '../../interface/api-response';
 import { Quote } from '../../interface/quote';
 import { QuoteService } from '../../service/quote.service';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-quotes',

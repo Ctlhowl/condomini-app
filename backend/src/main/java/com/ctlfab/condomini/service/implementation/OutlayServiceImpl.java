@@ -52,7 +52,7 @@ public class OutlayServiceImpl implements OutlayService {
         logger.info("Fetching all outlays by condominium ID: {}", condominiumId);
         List<OutlayDTO> outlays = new LinkedList<>();
 
-        for(Outlay outlay : outlayRepository.findAllOutlaysByCondominiumId(condominiumId)){
+        for(Outlay outlay : outlayRepository.findCondominiumOutlaysByCondominiumId(condominiumId)){
             outlays.add(mapEntityToDTO(outlay));
         }
 

@@ -32,12 +32,12 @@ public class TableAppendixController {
     }
 
     @GetMapping("/details")
-    public ResponseEntity<Response> getTableAppendixByCategory(@RequestParam(value = "id") String category) {
+    public ResponseEntity<Response> getTableAppendixById(@RequestParam(value = "id") long id) {
         return ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())
-                        .data(Map.of("tables", tableAppendixService.findTableByCategory(category)))
-                        .message("Tables " + category + ": retrieved")
+                        .data(Map.of("tables", tableAppendixService.findTableById(id)))
+                        .message("Table: retrieved")
                         .httpStatus(OK)
                         .statusCode(OK.value())
                         .build()

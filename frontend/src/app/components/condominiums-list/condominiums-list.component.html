@@ -24,7 +24,7 @@
                         <td>{{condominium.address}}</td>
                         <td>{{condominium.apartments?.length}}</td>
                         <td>{{condominium.lastYearBalance}}</td>
-                        <td><a class="btn btn-success" [routerLink]="['/preventivi', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
+                        <td><a class="btn btn-success" [routerLink]="['/quotes', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
                         <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCondominium" (click)="onOpenEditCondominiumModal(condominium)">Modifica</button></td>
                         <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCondominium" (click)="onOpenDeleteCondominiumModal(condominium)">Elimina</button></td>
                     </tr>
@@ -63,7 +63,7 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="address" class="form-label">Saldo Anno Precedente</label>
+                    <label for="lastYearBalance" class="form-label">Saldo Anno Precedente</label>
                     <div class="input-group">
                         <span class="input-group-text">€</span>
                         <input type="number" step="0.01" class="form-control" id="lastYearBalance" formControlName="lastYearBalance">
@@ -83,10 +83,10 @@
     <!-- Edit Condominium Modal -->
     <div class="modal fade" id="editCondominium" tabindex="-1" aria-labelledby="editCondominiumLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
+            <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="editCondominiumLabel">Modifica Condominio</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h1 class="modal-title fs-5" id="editCondominiumLabel">Modifica Condominio</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form [formGroup]="editForm" (ngSubmit)="onUpdateCondominium()">
@@ -110,21 +110,20 @@
                     
                     <div class="modal-footer">
                         <button type="button" id="edit-condominiumForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#prova" >Aggiungi Condominio</button>
                         <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Salva</button>
                     </div>
                 </form>
             </div>
-          </div>
+            </div>
         </div>
-      </div>
+    </div>
 
     <!-- Delete Condominium Modal -->
-     <div class="modal fade" id="deleteCondominium" tabindex="-1" aria-labelledby="deleteCondominiumLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteCondominium" tabindex="-1" aria-labelledby="deleteCondominiumLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="deleteCondominiumLabel">Aggiungi Condominio</h1>
+              <h1 class="modal-title fs-5" id="deleteCondominiumLabel">Elimina Condominio</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -136,7 +135,7 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
 </div>
 
 <router-outlet></router-outlet>
