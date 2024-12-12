@@ -44,4 +44,16 @@ public class TableAppendixController {
         );
     }
 
+    @GetMapping("/total-quote")
+    public ResponseEntity<Response> getTableAppendixTotalQuote(@RequestParam(value = "category") String category) {
+        return ResponseEntity.ok(
+                Response.builder()
+                        .timestamp(now())
+                        .data(Map.of("totalQuote", tableAppendixService.findTotalQuoteByCategory(category)))
+                        .message("Total quote: retrieved")
+                        .httpStatus(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
 }

@@ -3,9 +3,9 @@
         @if(errorMessage){
             <p class="text-danger">{{ errorMessage }}</p>
         }
-
+        <h3>Lista Condomini</h3>
         @if(condominiums && condominiums.length > 0){
-            <table class="table table-striped">
+            <table class="table table-striped mt-4">
                 <thead>
                     <tr>
                         <th scope="col">Nome</th>
@@ -24,7 +24,7 @@
                         <td>{{condominium.address}}</td>
                         <td>{{condominium.apartments?.length}}</td>
                         <td>{{condominium.lastYearBalance}}</td>
-                        <td><a class="btn btn-success" [routerLink]="['/quotes', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
+                        <td><a class="btn btn-success" [routerLink]="['/condominium/apartments', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
                         <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCondominium" (click)="onOpenEditCondominiumModal(condominium)">Modifica</button></td>
                         <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCondominium" (click)="onOpenDeleteCondominiumModal(condominium)">Elimina</button></td>
                     </tr>

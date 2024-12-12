@@ -36,7 +36,7 @@ export class CondominiumsListComponent implements OnInit {
     this.addForm = new FormGroup({
       name: new FormControl(null, Validators.required),
       address: new FormControl(null, Validators.required),
-      lastYearBalance: new FormControl(null, Validators.required)
+      lastYearBalance: new FormControl(0, Validators.required)
     });
   }
 
@@ -45,7 +45,7 @@ export class CondominiumsListComponent implements OnInit {
       id: new FormControl(null, Validators.required),
       name: new FormControl(null, Validators.required),
       address: new FormControl(null, Validators.required),
-      lastYearBalance: new FormControl(null, Validators.required)
+      lastYearBalance: new FormControl(0, Validators.required)
     });
   }
 

@@ -13,7 +13,7 @@ CREATE TABLE condomini_app.condominium(
 CREATE TABLE condomini_app.apartment(
     id SERIAL PRIMARY KEY,
     owner VARCHAR(255) NOT NULL,
-    tenant VARCHAR(255) NOT NULL,
+    tenant VARCHAR(255),
     scala VARCHAR(255) NOT NULL,
     last_year_balance REAL NOT NULL DEFAULT 0,
     mill_tab_A REAL NOT NULL DEFAULT 0,

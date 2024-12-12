@@ -1,1 +1,218 @@
-<p>apartment-list works!</p>
+<div class="ps-5 pe-5 mt-5" id="main-container">
+    <div>
+        @if(errorMessage){
+            <p class="text-danger">{{ errorMessage }}</p>
+        }
+        <div class="text-center">
+            <h3>Lista Appartamenti</h3>
+        </div>
+        @if(apartments && apartments.length > 0){
+            <table class="table table-striped table-sm mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">Propreitario</th>
+                        <th scope="col">Inquilino</th>
+                        <th scope="col">Scala</th>
+                        <th scope="col">Saldo Anno Precedente</th>
+                        <th scope="col">Mill Tab A</th>
+                        <th scope="col">Importo Dovuto Tab A</th>
+                        <th scope="col">Mill Tab B</th>
+                        <th scope="col">Importo Dovuto Tab B</th>
+                        <th scope="col">Mill Tab C</th>
+                        <th scope="col">Importo Dovuto Tab C</th>
+                        <th scope="col">Mill Tab D</th>
+                        <th scope="col">Importo Dovuto Tab D</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(apartment of apartments; track $index){
+                    <tr>
+                        <td>{{apartment.owner}}</td>
+                        <td>{{apartment.tenant}}</td>
+                        <td>{{apartment.scala}}</td>
+                        <td>{{apartment.lastYearBalance}}</td>
+                        <td>{{apartment.millTabA}}</td>
+                        <td>{{((totalTabA * apartment.millTabA) / 1000).toFixed(2)}}</td>
+                        <td>{{apartment.millTabB}}</td>
+                        <td>{{((totalTabB * apartment.millTabB) / 1000).toFixed(2)}}</td>
+                        <td>{{apartment.millTabC}}</td>
+                        <td>{{((totalTabC * apartment.millTabC) / 1000).toFixed(2)}}</td>
+                        <td>{{apartment.millTabD}}</td>
+                        <td>{{((totalTabD * apartment.millTabD) / 1000).toFixed(2)}}</td>
+                        <td><a class="btn btn-success" [routerLink]="['details', apartment.id]" routerLinkActive="router-link-active"  >Spese</a></td>
+                        <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editApartment" (click)="onOpenEditApartmentModal(apartment)">Modifica</button></td>
+                        <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteApartment" (click)="onOpenDeleteApartmentModal(apartment)">Elimina</button></td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if(!apartments || apartments.length === 0 && !errorMessage){
+            <h3>Nessun appartamento disponibile</h3>
+        }
+
+        <div class="text-center mt-5">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addApartment" >Aggiungi Appartamento</button>
+        </div>
+    </div>
+
+
+    <!-- Add Apartment Modal -->
+    <div class="modal fade" id="addApartment" tabindex="-1" aria-labelledby="addApartmentLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addApartmentLabel">Aggiungi Appartamento</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="addForm" (ngSubmit)="onAddApartment()">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="owner" class="form-label">Propreitario</label>
+                            <input type="text" class="form-control" id="owner" formControlName="owner">
+                        </div>
+                        <div class="col">
+                            <label for="tenant" class="form-label">Inquilino</label>
+                            <input type="text" class="form-control" id="tenant" formControlName="tenant">
+                        </div>
+                        <div class="col">
+                            <label for="scala" class="form-label">Scala</label>
+                            <input type="text" class="form-control" id="scala" formControlName="scala">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="millTabA" class="form-label">Mill Tabella A</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabA" formControlName="millTabA">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabB" class="form-label">Mill Tabella B</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabB" formControlName="millTabB">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabC" class="form-label">Mill Tabella C</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabC" formControlName="millTabC">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabD" class="form-label">Mill Tabella D</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabD" formControlName="millTabD">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="lastYearBalance" class="form-label">Saldo Anno Precedente</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" class="form-control" id="lastYearBalance" formControlName="lastYearBalance">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="add-apartmentForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                        <button type="submit" class="btn btn-success" [disabled]="addForm.invalid">Crea</button>
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    <!-- Edit Apartment Modal -->
+    <div class="modal fade" id="editApartment" tabindex="-1" aria-labelledby="editApartmentLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editApartmentLabel">Modifica Condominio</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="editForm" (ngSubmit)="onUpdateApartment()">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="owner" class="form-label">Propreitario</label>
+                            <input type="text" class="form-control" id="owner" formControlName="owner">
+                        </div>
+                        <div class="col">
+                            <label for="tenant" class="form-label">Inquilino</label>
+                            <input type="text" class="form-control" id="tenant" formControlName="tenant">
+                        </div>
+                        <div class="col">
+                            <label for="scala" class="form-label">Scala</label>
+                            <input type="text" class="form-control" id="scala" formControlName="scala">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="millTabA" class="form-label">Mill Tabella A</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabA" formControlName="millTabA">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabB" class="form-label">Mill Tabella B</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabB" formControlName="millTabB">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabC" class="form-label">Mill Tabella C</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabC" formControlName="millTabC">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="millTabD" class="form-label">Mill Tabella D</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="millTabD" formControlName="millTabD">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="lastYearBalance" class="form-label">Saldo Anno Precedente</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" class="form-control" id="lastYearBalance" formControlName="lastYearBalance">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="add-apartmentForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                        <button type="submit" class="btn btn-success" [disabled]="addForm.invalid">Crea</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Apartment Modal -->
+    <div class="modal fade" id="deleteApartment" tabindex="-1" aria-labelledby="deleteApartmentLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteApartmentLabel">Elimina Appartamento</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p>Sei sicuro di voler eliminare l'appartamento di {{deleteApartment?.owner}}?</p>
+               <div class="modal-footer">
+                <button type="button" id="delete-apartmentForm" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-danger" (click)="onDeleteApartment(deleteApartment?.id)">Elimina</button>
+               </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<router-outlet></router-outlet>

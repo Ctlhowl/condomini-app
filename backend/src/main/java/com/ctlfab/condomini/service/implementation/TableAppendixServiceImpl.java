@@ -6,6 +6,7 @@ import com.ctlfab.condomini.model.Quote;
 import com.ctlfab.condomini.model.TableAppendix;
 import com.ctlfab.condomini.repository.OutlayRepository;
 import com.ctlfab.condomini.repository.QuoteRepository;
+import com.ctlfab.condomini.repository.ReportRepository;
 import com.ctlfab.condomini.repository.TableAppendixRepository;
 import com.ctlfab.condomini.service.TableAppendixService;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,7 @@ public class TableAppendixServiceImpl implements TableAppendixService {
     private static final Logger logger = LoggerFactory.getLogger(TableAppendixServiceImpl.class);
     private final QuoteRepository quoteRepository;
     private final OutlayRepository outlayRepository;
+    private final ReportRepository reportRepository;
 
     @Override
     public TableAppendixDTO findTableById(Long tableId) {
@@ -43,6 +45,11 @@ public class TableAppendixServiceImpl implements TableAppendixService {
             tables.add(mapEntityToDTO(table));
         }
         return tables;
+    }
+
+    @Override
+    public Float findTotalQuoteByCategory(String category) {
+        return reportRepository.findTotalQuoteByCategory(category);
     }
 
     private TableAppendixDTO mapEntityToDTO(TableAppendix table) {

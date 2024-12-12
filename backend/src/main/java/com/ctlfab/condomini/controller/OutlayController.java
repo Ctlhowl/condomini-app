@@ -37,12 +37,24 @@ public class OutlayController {
         );
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getApartmentOutlays(@PathVariable(value = "condominiumId") long condominiumId,
+                                                        @PathVariable(value = "id") long id) {
+        return  ResponseEntity.ok(
+                Response.builder()
+                        .timestamp(now())
+                        .data(Map.of("outlays", outlayService.findApartmentOutlaysByApartmentId(id)))
+                        .message("Outlays retrieved")
+                        .httpStatus(OK)
+                        .statusCode(OK.value())
+                        .build()
+        );
+    }
+
     @PostMapping("/save")
     public ResponseEntity<Response> saveOutlay(@PathVariable(value = "condominiumId") long condominiumId,
                                               @RequestParam(value = "apartmentId", required = false) Long apartmentId,
                                               @Valid @RequestBody OutlayDTO outlayDTO) {
-
-        log.info("payload {}", outlayDTO);
         return ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())

@@ -19,6 +19,7 @@ export class CondominiumOutlayComponent implements OnInit{
   outlays: Outlay[] = [];
   tables: TableAppendix[] = [];
   errorMessage: string | null = null;
+  condominiumId!: number;
 
   selectedTable!: TableAppendix;
 
@@ -33,13 +34,13 @@ export class CondominiumOutlayComponent implements OnInit{
     private route: ActivatedRoute) { }
   
   ngOnInit(): void {
-    const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!) 
-    this.condominiumService.setSelectedCondominium(condominiumId); 
+    this.condominiumId = parseInt(this.route.snapshot.paramMap.get('id')!) 
+    this.condominiumService.setSelectedCondominium(this.condominiumId); 
     
     this.createAddForm();
     this.createEditForm();
     this.getTable();
-    this.getOutlay(condominiumId); 
+    this.getOutlay(); 
   }
 
 
@@ -78,16 +79,14 @@ export class CondominiumOutlayComponent implements OnInit{
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to load tables';
-        },
-        complete: () => {
-          console.log('Request completed');
         }
       }
     )  
   }
 
-  private getOutlay(condominiumId: number) {
-    this.outlayService.getOutlays(condominiumId).subscribe(
+  private getOutlay() {
+    
+    this.outlayService.getOutlays(this.condominiumId).subscribe(
       {
         next: (response: ApiResponse<Outlay[]>) => {
           if (response.statusCode === 200) {
@@ -98,9 +97,6 @@ export class CondominiumOutlayComponent implements OnInit{
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to load outlays';
-        },
-        complete: () => {
-          console.log('Request completed');
         }
       }
     )
@@ -117,24 +113,22 @@ export class CondominiumOutlayComponent implements OnInit{
 
   public onAddOutlay() {
     document.getElementById('add-outlayForm')?.click();
-    const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!);
     
-    this.outlayService.addOutlay(this.addForm.value, condominiumId).subscribe(
+    this.outlayService.addOutlay(this.addForm.value, this.condominiumId).subscribe(
       () => {
         this.createAddForm();
-        this.getOutlay(condominiumId);
+        this.getOutlay();
       }
     );
   }
 
   public onUpdateOutlay(): void{
     document.getElementById('edit-outlayForm')?.click();
-    const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!);
 
-    this.outlayService.updateOutlay(this.editForm.value, condominiumId).subscribe(
+    this.outlayService.updateOutlay(this.editForm.value, this.condominiumId).subscribe(
       () => {
         this.createEditForm();
-        this.getOutlay(condominiumId);
+        this.getOutlay();
       }
     );
   }
@@ -145,12 +139,10 @@ export class CondominiumOutlayComponent implements OnInit{
 
   public onDeleteOutlay(outlayId: number | undefined = -1): void{
     document.getElementById('delete-outlayForm')?.click();
-    const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!);
 
-    this.outlayService.deleteOutlay(outlayId, condominiumId).subscribe(
+    this.outlayService.deleteOutlay(outlayId, this.condominiumId).subscribe(
       () => {
-        const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!) 
-        this.getOutlay(condominiumId);
+        this.getOutlay();
       }
     );
   }

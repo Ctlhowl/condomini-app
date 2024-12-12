@@ -20,4 +20,8 @@ export class TableService {
   public getTableById(tableId: number): Observable<ApiResponse<TableAppendix>> {
     return this.http.get<ApiResponse<TableAppendix>>(`${this.apiServerUrl}/details`, {params: {id: tableId}});
   }
+
+  public getTotalQuoteByCategory(category: string): Observable<ApiResponse<number>> {
+    return this.http.get<ApiResponse<number>>(`${this.apiServerUrl}/total-quote`, {params: {category: category}});
+  }
 }
