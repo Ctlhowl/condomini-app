@@ -30,11 +30,11 @@ export class OutlayService {
   }
 
   public updateOutlay(outlay: Outlay, condominiumId: number): Observable<ApiResponse<Outlay>> {
-    return this.http.put<ApiResponse<Outlay>>(`${this.apiServerUrl}/${condominiumId}/outlay/edit`, outlay);
+    return this.http.put<ApiResponse<Outlay>>(`${this.apiServerUrl}/${condominiumId}/outlay/edit`, outlay, {params: {outlayId: outlay.id}});
   }
 
   public updateApartmentOutlay(outlay: Outlay, condominiumId: number, apartmentId: number): Observable<ApiResponse<Outlay>> {
-    return this.http.put<ApiResponse<Outlay>>(`${this.apiServerUrl}/${condominiumId}/outlay/edit`, outlay, {params: {apartmentId: apartmentId}});
+    return this.http.put<ApiResponse<Outlay>>(`${this.apiServerUrl}/${condominiumId}/outlay/edit`, outlay, {params: {apartmentId: apartmentId, outlayId: outlay.id}});
   }
 
   public deleteOutlay(outlayId: number, condominiumId: number): Observable<void> {

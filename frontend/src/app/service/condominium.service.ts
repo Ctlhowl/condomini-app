@@ -36,10 +36,15 @@ export class CondominiumService {
   }
 
   public updateCondominium(condominium: Condominium): Observable<ApiResponse<Condominium>> {
-    return this.http.put<ApiResponse<Condominium>>(`${this.apiServerUrl}/edit`, condominium);
+    return this.http.put<ApiResponse<Condominium>>(`${this.apiServerUrl}/edit`, condominium, {params: {id: condominium.id}});
   }
 
   public deleteCondominium(condominiumId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiServerUrl}/delete`, { params: { id: condominiumId } });
+  }
+
+
+  public exportPDF(condominiumId: number): Observable<Blob>{
+    return this.http.get(`${this.apiServerUrl}/export/${condominiumId}`, {responseType: 'blob'});
   }
 }

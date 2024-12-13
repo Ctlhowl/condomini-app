@@ -8,6 +8,5 @@ public interface ApartmentService {
     ApartmentDTO saveApartment(ApartmentDTO apartmentDTO, Long condominiumId);
     ApartmentDTO updateApartment(ApartmentDTO apartmentDTO, Long condominiumId);
     Boolean deleteApartment(Long id);
-    ApartmentDTO findApartmentById(Long id);
     Collection<ApartmentDTO> findApartmentsByCondominiumId(Long condominiumId);
 }

@@ -20,6 +20,7 @@ export class ApartmentOutlayComponent implements OnInit{
   errorMessage: string | null = null;
   condominiumId!: number;
   apartmentId!: number;
+  owner!: string;
 
   selectedTable!: TableAppendix;
 
@@ -36,6 +37,8 @@ export class ApartmentOutlayComponent implements OnInit{
     ngOnInit(): void {
       this.condominiumId = parseInt(this.route.snapshot.paramMap.get('condominiumId')!);
       this.apartmentId = parseInt(this.route.snapshot.paramMap.get('id')!);
+      this.owner = this.route.snapshot.paramMap.get('owner')!;
+      
       this.condominiumService.setSelectedCondominium(this.condominiumId); 
       
       this.createAddForm();
@@ -98,11 +101,6 @@ export class ApartmentOutlayComponent implements OnInit{
           },
           error: (err) => {
             this.errorMessage = err.error?.message || 'Failed to load outlays';
-          },
-          complete: () =>
-          {
-            console.log(this.outlays);
-            console.log('request complete');
           }
         }
       )
@@ -114,7 +112,8 @@ export class ApartmentOutlayComponent implements OnInit{
       this.editForm.get('amount')?.setValue(outlay.amount);
       this.editForm.get('operationType')?.setValue(outlay.operationType);
       this.editForm.get('paymentMethod')?.setValue(outlay.paymentMethod);
-      this.editForm.get('outlayType')?.setValue(outlay.operationType);
+      this.editForm.get('outlayType')?.setValue(outlay.outlayType);
+      this.editForm.get('table')?.setValue(`${outlay.table.category} - ${outlay.table.description}`);
     }
   
     public onAddOutlay() {
@@ -128,28 +127,50 @@ export class ApartmentOutlayComponent implements OnInit{
       );
     }
   
-    public onUpdateOutlay(): void{
-      document.getElementById('edit-outlayForm')?.click();
+  public onUpdateOutlay(): void{
+    let tab: TableAppendix[] = this.tables.filter((table) => {
+      let str: string = `${table.category} - ${table.description}`
+      if (str === this.editForm.get('table')?.value) {
+        return table;
+      }
+      return null;
+    });
+    
+    document.getElementById('edit-outlayForm')?.click();
+    
+    this.editForm.patchValue({
+      table: tab[0]
+    });
   
-      this.outlayService.updateApartmentOutlay(this.editForm.value, this.condominiumId, this.apartmentId).subscribe(
-        () => {
-          this.createEditForm();
-          this.getOutlay();
-        }
-      );
-    }
   
-    public onOpenDeleteOutlayModal(outlay: Outlay) {
-      this.deleteOutlay = outlay;
-    }
+    this.outlayService.updateApartmentOutlay(this.editForm.value, this.condominiumId, this.apartmentId).subscribe(
+      () => {
+        this.createEditForm();
+        this.getOutlay();
+      }
+    );
+  }
   
-    public onDeleteOutlay(outlayId: number | undefined = -1): void{
-      document.getElementById('delete-outlayForm')?.click();
+  public onOpenDeleteOutlayModal(outlay: Outlay) {
+    this.deleteOutlay = outlay;
+  }
   
-      this.outlayService.deleteOutlay(outlayId, this.condominiumId).subscribe(
-        () => {
-          this.getOutlay();
-        }
-      );
-    }
+  public onDeleteOutlay(outlayId: number | undefined = -1): void{
+    document.getElementById('delete-outlayForm')?.click();
+
+    this.outlayService.deleteOutlay(outlayId, this.condominiumId).subscribe(
+      () => {
+        this.getOutlay();
+      }
+    );
+  }
+
+  public getTotalOutlay(): number{
+    let total: number = 0;
+    this.outlays.forEach((outlay) => {
+      total += outlay.amount;
+    });
+
+    return total;
+  }
  }

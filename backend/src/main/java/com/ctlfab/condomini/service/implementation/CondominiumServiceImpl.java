@@ -64,7 +64,7 @@ public class CondominiumServiceImpl implements CondominiumService {
         logger.info("Fetching all condominiums");
 
         Collection<CondominiumDTO> condominiums = new LinkedList<>();
-        for(Condominium condominium : condominiumRepository.findAll()){
+        for(Condominium condominium : condominiumRepository.findAllOrderById()){
             condominiums.add(mapEntityToDTO(condominium));
         }
 

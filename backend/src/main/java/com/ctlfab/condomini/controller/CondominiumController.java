@@ -3,14 +3,19 @@ package com.ctlfab.condomini.controller;
 import com.ctlfab.condomini.DTO.CondominiumDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.CondominiumService;
+import com.ctlfab.condomini.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.Collection;
+import java.io.ByteArrayInputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
@@ -23,6 +28,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CondominiumController {
     private final CondominiumService condominiumService;
+    private final ReportService reportService;
 
     @GetMapping("/list")
     public ResponseEntity<Response> getCondominiums() {
@@ -90,5 +96,17 @@ public class CondominiumController {
                         .statusCode(OK.value())
                         .build()
         );
+    }
+
+    @GetMapping("/export/{condominiumId}")
+    public ResponseEntity<InputStreamResource> exportCondominium(@PathVariable(value = "condominiumId") long condominiumId) {
+        CondominiumDTO condominiumDTO = condominiumService.findCondominiumById(condominiumId);
+        ByteArrayInputStream bais = reportService.exportToPDF(condominiumDTO);
+
+        HttpHeaders headers = new HttpHeaders();
+        String filename = now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy")) + "_report.pdf";
+        headers.add("Content-Disposition", "inline; filename=" + filename);
+
+        return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(bais));
     }
 }

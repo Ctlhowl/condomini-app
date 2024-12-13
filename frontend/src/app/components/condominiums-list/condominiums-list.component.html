@@ -15,6 +15,7 @@
                         <th scope="col"></th>
                         <th scope="col"></th>
                         <th scope="col"></th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,6 +25,7 @@
                         <td>{{condominium.address}}</td>
                         <td>{{condominium.apartments?.length}}</td>
                         <td>{{condominium.lastYearBalance}}</td>
+                        <td><a class="btn" (click)="exportToPDF(condominium)"><img src="assets/pdf.png"></a></td>
                         <td><a class="btn btn-success" [routerLink]="['/condominium/apartments', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
                         <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCondominium" (click)="onOpenEditCondominiumModal(condominium)">Modifica</button></td>
                         <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCondominium" (click)="onOpenDeleteCondominiumModal(condominium)">Elimina</button></td>
@@ -127,7 +129,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <p>Sei sicuro di voler eliminare il condominio {{deleteCondominium?.name}}?</p>
+               <p>Sei sicuro di voler eliminare il condominio <span class="text-danger">{{deleteCondominium?.name}}</span>?</p>
                <div class="modal-footer">
                 <button type="button" id="delete-condominiumForm" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
                 <button type="submit" class="btn btn-danger" (click)="onDeleteCondominium(deleteCondominium?.id)">Elimina</button>

@@ -12,4 +12,5 @@ public interface OutlayService {
     OutlayDTO saveOutlay(OutlayDTO outlayDTO, Long condominiumId, Long apartmentId, Long id);
     OutlayDTO updateOutlay(OutlayDTO outlayDTO, Long condominiumId, Long apartmentId, Long id);
     Boolean deleteOutlay(Long id);
+    Float totalAmountByApartmentId(Long apartmentId);
 }

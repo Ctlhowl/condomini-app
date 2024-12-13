@@ -194,9 +194,135 @@ export class ApartmentListComponent implements OnInit{
   
       this.apartmentService.deleteApartment(apartmentId).subscribe(
         () => {
-          const condominiumId: number = parseInt(this.route.snapshot.paramMap.get('id')!) 
           this.getApartment();
         }
       );
-    }
+  }
+  
+  public totalOutlayAmount(apartment: Apartment, category: string): number {
+    let total: number = 0;
+
+    apartment.outlays.filter((outlay) => outlay.table.category === category).forEach((outlay) => {
+      total += outlay.amount;
+    });
+
+    return total;
+  }
+
+
+  public getTotalMillA(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total += apartment.millTabA;
+    });
+
+    return total;
+  }
+  
+  public getTotalA(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total = ((this.totalTabA * apartment.millTabA) / 1000)
+    });
+
+    return total;
+  }
+
+  public getTotalOutlayA(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      apartment.outlays.filter(outlay => outlay.table.category === 'A').forEach((outlay) => {
+        total += outlay.amount;
+      });
+    });
+
+    return total;
+  }
+
+  public getTotalMillB(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total += apartment.millTabB;
+    });
+
+    return total;
+  }
+
+  public getTotalB(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total = ((this.totalTabB * apartment.millTabB) / 1000)
+    });
+
+    return total;
+  }
+
+  public getTotalOutlayB(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      apartment.outlays.filter(outlay => outlay.table.category === 'B').forEach((outlay) => {
+        total += outlay.amount;
+      });
+    });
+
+    return total;
+  }
+
+  public getTotalMillC(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total += apartment.millTabC;
+    });
+
+    return total;
+  }
+
+  public getTotalC(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total = ((this.totalTabC * apartment.millTabC) / 1000)
+    });
+
+    return total;
+  }
+
+  public getTotalOutlayC(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      apartment.outlays.filter(outlay => outlay.table.category === 'C').forEach((outlay) => {
+        total += outlay.amount;
+      });
+    });
+
+    return total;
+  }
+
+  public getTotalMillD(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total += apartment.millTabD;
+    });
+
+    return total;
+  }
+
+  public getTotalD(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      total = ((this.totalTabD * apartment.millTabD) / 1000)
+    });
+
+    return total;
+  }
+
+  public getTotalOutlayD(): number{
+    let total: number = 0;
+    this.apartments.forEach((apartment) => {
+      apartment.outlays.filter(outlay => outlay.table.category === 'D').forEach((outlay) => {
+        total += outlay.amount;
+      });
+    });
+
+    return total;
+  }
 }

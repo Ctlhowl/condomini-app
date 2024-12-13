@@ -60,12 +60,6 @@ public class ApartmentServiceImpl implements ApartmentService {
     }
 
     @Override
-    public ApartmentDTO findApartmentById(Long id) {
-        logger.info("Fetching apartment by ID: {} ", id);
-        return mapEntityToDTO(apartmentRepository.findById(id).get());
-    }
-
-    @Override
     public Collection<ApartmentDTO> findApartmentsByCondominiumId(Long condominiumId) {
         logger.info("Fetching apartments by condominium ID: {}", condominiumId);
 

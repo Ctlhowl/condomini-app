@@ -37,6 +37,13 @@
                     </tr>
                     }
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><b>Totale</b></td>
+                        <td><b>€ {{getTotalOutlay()}}</b></td>
+                        <td colspan="6"></td>
+                    </tr>
+                </tfoot>
             </table>
         }
 
@@ -168,7 +175,7 @@
                         <label for="table" class="form-label">Tabella Di Riferimento</label>
                         <select class="form-select" id="table" formControlName="table">
                             @for (table of tables; track $index) {
-                                <option [ngValue]="table">{{table.category}} - {{table.description}}</option>
+                                <option [ngValue]="table" [value]="table.category + ' - ' + table.description" selected>{{table.category}} - {{table.description}}</option>
                             }
                         </select>  
                     </div>
@@ -193,7 +200,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <p>Sei sicuro di voler eliminare la spesa {{deleteOutlay?.description}}?</p>
+               <p>Sei sicuro di voler eliminare la spesa <span class="text-danger">{{deleteOutlay?.description}}</span>?</p>
                <div class="modal-footer">
                 <button type="button" id="delete-outlayForm" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
                 <button type="submit" class="btn btn-danger" (click)="onDeleteOutlay(deleteOutlay?.id)">Elimina</button>

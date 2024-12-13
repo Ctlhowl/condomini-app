@@ -108,7 +108,8 @@ export class CondominiumOutlayComponent implements OnInit{
     this.editForm.get('amount')?.setValue(outlay.amount);
     this.editForm.get('operationType')?.setValue(outlay.operationType);
     this.editForm.get('paymentMethod')?.setValue(outlay.paymentMethod);
-    this.editForm.get('outlayType')?.setValue(outlay.operationType);
+    this.editForm.get('outlayType')?.setValue(outlay.outlayType);
+    this.editForm.get('table')?.setValue(`${outlay.table.category} - ${outlay.table.description}`);
   }
 
   public onAddOutlay() {
@@ -123,8 +124,20 @@ export class CondominiumOutlayComponent implements OnInit{
   }
 
   public onUpdateOutlay(): void{
+    let tab: TableAppendix[] = this.tables.filter((table) => {
+      let str: string = `${table.category} - ${table.description}`
+      if (str === this.editForm.get('table')?.value) {
+        return table;
+      }
+      return null;
+    });
+    
     document.getElementById('edit-outlayForm')?.click();
-
+    
+    this.editForm.patchValue({
+      table: tab[0]
+    });
+   
     this.outlayService.updateOutlay(this.editForm.value, this.condominiumId).subscribe(
       () => {
         this.createEditForm();
@@ -145,6 +158,15 @@ export class CondominiumOutlayComponent implements OnInit{
         this.getOutlay();
       }
     );
+  }
+
+  public getTotalOutlay(): number{
+    let total: number = 0;
+    this.outlays.forEach((outlay) => {
+      total += outlay.amount;
+    });
+
+    return total;
   }
  }
 

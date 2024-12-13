@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface QuoteRepository extends JpaRepository<Quote, Long> {
-    @Query("SELECT q FROM Quote q  WHERE q.condominium.id = :condominiumId")
+    @Query("SELECT q FROM Quote q  WHERE q.condominium.id = :condominiumId ORDER BY q.id ASC")
     Collection<Quote> findAllQuotesByCondominium(Long condominiumId);
 
     @Query("SELECT q FROM Quote q  WHERE q.table.id = :tableId")

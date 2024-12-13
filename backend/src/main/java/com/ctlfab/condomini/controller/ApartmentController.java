@@ -4,6 +4,7 @@ import com.ctlfab.condomini.DTO.ApartmentDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.ApartmentService;
 import com.ctlfab.condomini.service.CondominiumService;
+import com.ctlfab.condomini.service.OutlayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ApartmentController {
     private final ApartmentService apartmentService;
+    private final OutlayService outlayService;
 
     @GetMapping("/list")
     public ResponseEntity<Response> getApartments(@PathVariable(value = "condominiumId") long condominiumId) {

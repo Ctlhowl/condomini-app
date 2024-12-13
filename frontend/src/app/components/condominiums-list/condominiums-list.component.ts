@@ -5,6 +5,7 @@ import { ApiResponse } from '../../interface/api-response';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { timestamp } from 'rxjs';
 
 @Component({
   selector: 'app-condominiums-list',
@@ -105,5 +106,24 @@ export class CondominiumsListComponent implements OnInit {
     this.condominiumService.deleteCondominium(condominiumId).subscribe(
       () => {this.getCondominiums();}
     );
+  }
+
+  public exportToPDF(condominium: Condominium) {
+    this.condominiumService.exportPDF(condominium.id).subscribe((pdf) => {
+      const blob = new Blob([pdf], { type: 'application/pdf' });
+
+      const data = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = data;
+
+      let dateTime = new Date();
+      link.download = `${dateTime.toLocaleString().split(',')[0]}_report.pdf`;
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+      setTimeout(function () {
+        window.URL.revokeObjectURL(data);
+        link.remove();
+      }, 100);
+    });
   }
 }

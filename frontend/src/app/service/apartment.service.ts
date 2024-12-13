@@ -22,7 +22,7 @@ export class ApartmentService {
   }
 
   public updateApartment(apartment: Apartment, condominiumId: number): Observable<ApiResponse<Apartment>> {
-    return this.http.put<ApiResponse<Apartment>>(`${this.apiServerUrl}/${condominiumId}/apartment/edit`, apartment);
+    return this.http.put<ApiResponse<Apartment>>(`${this.apiServerUrl}/${condominiumId}/apartment/edit`, apartment, {params: {id: apartment.id}});
   }
 
   public deleteApartment(condominiumId: number): Observable<void> {

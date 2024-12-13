@@ -69,10 +69,10 @@ public class OutlayController {
 
     @PutMapping("/edit")
     private ResponseEntity<Response> editOutlay(@PathVariable(value = "condominiumId") long condominiumId,
-                                               @RequestParam(value = "id") Long id,
+                                               @RequestParam(value = "outlayId") long outlayId,
                                                @RequestParam(value = "apartmentId", required = false) Long apartmentId,
                                                @Valid @RequestBody OutlayDTO outlayDTO) {
-        outlayDTO.setId(id);
+        outlayDTO.setId(Long.valueOf(outlayId));
         return ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())

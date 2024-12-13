@@ -10,7 +10,7 @@ export const routes: Routes = [
     { path: 'quotes/:id', component: QuotesComponent },
     { path: 'condominium/outlays/:id', component: CondominiumOutlayComponent },
     { path: 'condominium/apartments/:id', component: ApartmentListComponent },
-    { path: 'condominium/apartments/:condominiumId/details/:id', component: ApartmentOutlayComponent, pathMatch: 'full'}
+    { path: 'condominium/apartments/:condominiumId/details/:id/owner/:owner', component: ApartmentOutlayComponent}
 ];
     
 export class AppRoutingModule {}

@@ -8,7 +8,7 @@ import java.util.Collection;
 
 public interface OutlayRepository extends JpaRepository<Outlay, Long> {
 
-    @Query("SELECT o FROM Outlay o WHERE o.apartment.id = :apartmentId")
+    @Query("SELECT o FROM Outlay o WHERE o.apartment.id = :apartmentId ORDER BY o.id ASC")
     Collection<Outlay> findApartmentOutlaysByApartmentId(Long apartmentId);
 
     @Query("SELECT o FROM Outlay o WHERE o.condominium.id = :condominiumId and o.apartment.id IS NULL")
@@ -19,5 +19,8 @@ public interface OutlayRepository extends JpaRepository<Outlay, Long> {
 
     @Query("SELECT o FROM Outlay o WHERE o.table.id = :tableId")
     Collection<Outlay> findAllOutlaysByTableId(Long tableId);
+
+    @Query("SELECT SUM(o.amount) FROM Outlay o WHERE o.apartment.id = :apartmentId")
+    Float totalAmountByApartmentId(Long apartmentId);
 }
 

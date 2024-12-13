@@ -83,6 +83,12 @@ public class OutlayServiceImpl implements OutlayService {
         return TRUE;
     }
 
+    @Override
+    public Float totalAmountByApartmentId(Long apartmentId) {
+        logger.info("Fetching total amount of outlay by Apartment Id: {} ", apartmentId);
+        return outlayRepository.totalAmountByApartmentId(apartmentId);
+    }
+
     private OutlayDTO mapEntityToDTO(Outlay outlay) {
         TableAppendixDTO tableDTO = tableAppendixService.findTableById(outlay.getTable().getId());
 
