@@ -1,13 +1,13 @@
 package com.ctlfab.condomini.service.implementation;
 
-import com.ctlfab.condomini.DTO.TableAppendixDTO;
+import com.ctlfab.condomini.dto.TableAppendixDTO;
 import com.ctlfab.condomini.model.Outlay;
 import com.ctlfab.condomini.model.Quote;
 import com.ctlfab.condomini.model.TableAppendix;
 import com.ctlfab.condomini.repository.OutlayRepository;
 import com.ctlfab.condomini.repository.QuoteRepository;
-import com.ctlfab.condomini.repository.ReportRepository;
 import com.ctlfab.condomini.repository.TableAppendixRepository;
+import com.ctlfab.condomini.service.MyUtils;
 import com.ctlfab.condomini.service.TableAppendixService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
@@ -28,12 +29,14 @@ public class TableAppendixServiceImpl implements TableAppendixService {
     private static final Logger logger = LoggerFactory.getLogger(TableAppendixServiceImpl.class);
     private final QuoteRepository quoteRepository;
     private final OutlayRepository outlayRepository;
-    private final ReportRepository reportRepository;
+    private final MyUtils myUtils;
 
     @Override
     public TableAppendixDTO findTableById(Long tableId) {
         logger.info("Fetching table by id {}", tableId);
-        return mapEntityToDTO(tableAppendixRepository.findById(tableId).get());
+        Optional<TableAppendix> tables = tableAppendixRepository.findById(tableId);
+
+        return tables.map(this::mapEntityToDTO).orElse(null);
     }
 
     @Override
@@ -49,7 +52,12 @@ public class TableAppendixServiceImpl implements TableAppendixService {
 
     @Override
     public Float findTotalQuoteByCategory(String category) {
-        return reportRepository.findTotalQuoteByCategory(category);
+        return tableAppendixRepository.findTotalQuoteByCategory(category);
+    }
+
+    @Override
+    public Float findTotalQuoteByCategoryAndYear(String category, int year) {
+        return tableAppendixRepository.findTotalQuoteByCategoryAndYear(category, myUtils.startDateTime(year), myUtils.endDateTime(year));
     }
 
     private TableAppendixDTO mapEntityToDTO(TableAppendix table) {
@@ -57,19 +65,6 @@ public class TableAppendixServiceImpl implements TableAppendixService {
                 .id(table.getId())
                 .category(table.getCategory())
                 .description(table.getDescription())
-                .build();
-    }
-
-    private TableAppendix mapDTOToEntity(TableAppendixDTO tableDTO) {
-        Quote quote = quoteRepository.findQuoteByTableId(tableDTO.getId());
-        List<Outlay> outlays = outlayRepository.findAllOutlaysByTableId(tableDTO.getId()).stream().toList();
-
-        return TableAppendix.builder()
-                .id(tableDTO.getId())
-                .category(tableDTO.getCategory())
-                .description(tableDTO.getDescription())
-                .quote(quote)
-                .outlays(outlays)
                 .build();
     }
 }

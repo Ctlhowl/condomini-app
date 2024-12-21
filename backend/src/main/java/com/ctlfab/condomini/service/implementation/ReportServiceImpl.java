@@ -1,10 +1,6 @@
 package com.ctlfab.condomini.service.implementation;
 
-import com.ctlfab.condomini.DTO.*;
-import com.ctlfab.condomini.model.Condominium;
-import com.ctlfab.condomini.model.Report;
-import com.ctlfab.condomini.repository.CondominiumRepository;
-import com.ctlfab.condomini.repository.ReportRepository;
+import com.ctlfab.condomini.dto.*;
 import com.ctlfab.condomini.service.OutlayService;
 import com.ctlfab.condomini.service.ReportService;
 import com.ctlfab.condomini.service.TableAppendixService;
@@ -22,81 +18,48 @@ import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import static java.time.LocalDateTime.now;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 @Transactional
 public class ReportServiceImpl implements ReportService {
-    private final ReportRepository reportRepository;
     private static final Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
-    private final CondominiumRepository condominiumRepository;
     private final TableAppendixService tableAppendixService;
     private final OutlayService outlayService;
 
     @Override
-    public ReportDTO saveReport(ReportDTO reportDTO) {
-        logger.info("Saving report {}", reportDTO);
+    public ByteArrayInputStream exportToPDF(CondominiumDTO condominiumDTO, int year) {
+        logger.info("Creating Report");
 
-        Report report = mapDTOToEntity(reportDTO);
-        return mapEntityToDTO(reportRepository.save(report));
-    }
-
-    @Override
-    public ReportDTO findReportById(Long reportId) {
-        logger.info("Fetching report by ID: {}", reportId);
-
-        return mapEntityToDTO(reportRepository.findById(reportId).get());
-    }
-
-    @Override
-    public Collection<ReportDTO> findAllReportByCondominiumId(Long condominiumId) {
-        logger.info("Fetching all report by condominium ID: {}", condominiumId);
-
-        Collection<ReportDTO> reports = new LinkedList<>();
-
-        for(Report report : reportRepository.findAllReportByCondominiumId(condominiumId)) {
-            reports.add(mapEntityToDTO(report));
-        }
-
-        return reports;
-    }
-
-    @Override
-    public ByteArrayInputStream exportToPDF(CondominiumDTO condominiumDTO) {
         Document document = new Document();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK);
-        String title = "Report Condominale del " + now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         try {
             PdfWriter.getInstance(document, outputStream);
             document.open();
-            document.addTitle(title);
-            PdfName pdfName = new PdfName(title);
-            document.setRole(pdfName);
 
-            Paragraph paragraph = new Paragraph(title, font);
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
-            document.add(Chunk.NEWLINE);
+            addFirstPage(document, year);
+            addQuoteTablePage(document, condominiumDTO);
+            document.newPage();
 
-            addQuoteTable(document, condominiumDTO);
-
+            // Change landscape
             Rectangle layout = new Rectangle(PageSize.A4).rotate();
             document.setPageSize(layout);
-            document.newPage();
-            addCondominiumOutlay(document, condominiumDTO);
 
+            addCondominiumOutlay(document, condominiumDTO);
             document.newPage();
-            addApartmentOutlay(document, condominiumDTO.getApartments());
+
+            addApartmentsOutlayPage(document, condominiumDTO.getApartments(), year);
+            document.newPage();
+
+            for(ApartmentDTO apartmentDTO : condominiumDTO.getApartments()) {
+                addApartmentOutlayDetailsPage(document, apartmentDTO);
+                document.newPage();
+            }
 
             document.close();
 
@@ -106,270 +69,306 @@ public class ReportServiceImpl implements ReportService {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
-    private void addApartmentOutlay(Document document, List<ApartmentDTO> apartmentsDTO) throws DocumentException{
-        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
-        Paragraph title = new Paragraph("Spese Appartamenti" ,titleFont);
+    private void addFirstPage(Document document, int year) throws DocumentException {
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK);
+        String title = "Bilancio Esercizio " + year + " - " + (year + 1);
+        PdfName pdfName = new PdfName(title);
+
+        document.setRole(pdfName);
+        document.addTitle(title);
+
+        Paragraph paragraph = new Paragraph(title, font);
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        document.add(paragraph);
+        document.add(Chunk.NEWLINE);
+    }
+
+    private void addQuoteTablePage(Document document, CondominiumDTO condominiumDTO) throws DocumentException {
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
+        Paragraph title = new Paragraph("Preventivi" ,font);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(Chunk.NEWLINE);
 
-        addApartmentOutlayTable(document, apartmentsDTO);
+
+        // Retrieve quote by table category
+        List<QuoteDTO> quoteTabA = condominiumDTO.getQuotes()
+                                                 .stream()
+                                                 .filter(quote -> quote.getTable().getCategory().equals("A"))
+                                                 .toList();
+
+        List<QuoteDTO> quoteTabB = condominiumDTO.getQuotes()
+                                                 .stream()
+                                                 .filter(quote -> quote.getTable().getCategory().equals("B"))
+                                                 .toList();
+
+        List<QuoteDTO> quoteTabC = condominiumDTO.getQuotes()
+                                                 .stream()
+                                                 .filter(quote -> quote.getTable().getCategory().equals("C"))
+                                                 .toList();
+        List<QuoteDTO> quoteTabD = condominiumDTO.getQuotes()
+                                                 .stream()
+                                                 .filter(quote -> quote.getTable().getCategory().equals("D"))
+                                                 .toList();
+
+        // Set page
+        final String tileTableA = "Table A";
+        final String tileTableB = "Table B";
+        final String tileTableC = "Table C";
+        final String tileTableD = "Table D";
+
+        addTableQuote(tileTableA, document, quoteTabA);
+        addTableQuote(tileTableB, document, quoteTabB);
+        addTableQuote(tileTableC, document, quoteTabC);
+        addTableQuote(tileTableD, document, quoteTabD);
     }
 
-    private void addApartmentOutlayTable(Document document, List<ApartmentDTO> apartmentsDTO) throws DocumentException{
-        PdfPTable table = new PdfPTable(14);
+    private void addApartmentsOutlayPage(Document document, List<ApartmentDTO> apartmentsDTO, int year) throws DocumentException{
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
+        Paragraph title = new Paragraph("Spese Generali Appartamenti" ,font);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        document.add(Chunk.NEWLINE);
+
+        addApartmentOutlayTable(document, apartmentsDTO, year);
+    }
+
+    private void addApartmentOutlayDetailsPage(Document document, ApartmentDTO apartmentDTO) throws DocumentException{
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
+        Paragraph title = new Paragraph("Spese Dettagliate Appartamento di " + apartmentDTO.getOwner() ,font);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        document.add(Chunk.NEWLINE);
+
+        addApartmentOutlayDetailsTable(document, apartmentDTO.getOutlays());
+    }
+
+    private void addApartmentOutlayDetailsTable(Document document, List<OutlayDTO> outlaysDTO) throws DocumentException {
+        Font headFont = FontFactory.getFont(FontFactory.HELVETICA, 8, BaseColor.BLACK);
+
+        PdfPTable table = new PdfPTable(7);
         table.setWidthPercentage(100);
 
-        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, BaseColor.BLACK);
-        Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 8, BaseColor.BLACK);
+        // Set Title of header
+        List<String> tableHead = new ArrayList<>();
+        tableHead.add("Data");
+        tableHead.add("Descrizione");
+        tableHead.add("Importo");
+        tableHead.add("Tipo Operazione");
+        tableHead.add("Tipo Pagamento");
+        tableHead.add("Tipo Spesa");
+        tableHead.add("Tabella");
 
+        tableHead.forEach(headerTitle -> {
+            PdfPCell header = new PdfPCell();
+            header.setHorizontalAlignment(Element.ALIGN_CENTER);
+            header.setBackgroundColor(BaseColor.LIGHT_GRAY);
 
-        Stream.of( "Proprietario", "Tabella A", "Tabella B", "Tabella C", "Tabella D", "Saldo Precedente", "Totale Spese", "Conguaglio Inizio Anno",  "Totale Versato", "Conguaglio Finale").forEach((headerTitle) -> {
+            header.setPhrase(new Phrase(headerTitle, headFont));
+            table.addCell(header);
+        });
+
+        for(OutlayDTO outlayDTO : outlaysDTO){
+            String date = outlayDTO.getCreatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            addCell(table, date);
+            addCell(table, outlayDTO.getDescription());
+            addCell(table, String.valueOf(outlayDTO.getAmount()));
+            addCell(table, String.valueOf(outlayDTO.getOperationType()));
+            addCell(table, String.valueOf(outlayDTO.getPaymentMethod()));
+            addCell(table, String.valueOf(outlayDTO.getOutlayType()));
+
+            String tableAppendix = outlayDTO.getTable().getCategory() + " - " + outlayDTO.getTable().getDescription();
+            addCell(table, tableAppendix);
+        }
+
+        document.add(table);
+        document.add(Chunk.NEWLINE);
+    }
+
+    private void addApartmentTableHead(PdfPTable table) {
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, BaseColor.BLACK);
+
+        // Set Title of header
+        List<String> tableHead = new ArrayList<>();
+        tableHead.add("Proprietario");
+        tableHead.add("Tabella A");
+        tableHead.add("Tabella B");
+        tableHead.add("Tabella C");
+        tableHead.add("Tabella D");
+        tableHead.add("Saldo Precedente");
+        tableHead.add("Totale Spese");
+        tableHead.add("Conguaglio Inizio Anno");
+        tableHead.add("Totale Versato");
+        tableHead.add("Conguaglio Finale");
+
+        tableHead.forEach(headerTitle -> {
             PdfPCell header = new PdfPCell();
             header.setHorizontalAlignment(Element.ALIGN_CENTER);
             header.setBackgroundColor(BaseColor.LIGHT_GRAY);
 
             if(headerTitle.equals("Tabella A") || headerTitle.equals("Tabella B") ||
-                headerTitle.equals("Tabella C") || headerTitle.equals("Tabella D")){
+                    headerTitle.equals("Tabella C") || headerTitle.equals("Tabella D")){
                 header.setColspan(2);
             }
 
-            header.setPhrase(new Phrase(headerTitle, headerFont));
+            header.setPhrase(new Phrase(headerTitle, font));
             table.addCell(header);
         });
+
+        addSubApartmentTableHead(table);
+    }
+
+    private void addSubApartmentTableHead(PdfPTable table) {
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, BaseColor.BLACK);
+
+        // Set Title of sub header
+        List<String> subTableHead = new ArrayList<>();
+        subTableHead.add("Mill A");
+        subTableHead.add("Mill B");
+        subTableHead.add("Mill C");
+        subTableHead.add("Mill D");
 
         PdfPCell emptyCell = new PdfPCell();
         emptyCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         emptyCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        emptyCell.setPhrase(new Phrase("", headerFont));
+        emptyCell.setPhrase(new Phrase(""));
+
         table.addCell(emptyCell);
 
-        Stream.of("Mill A", "Mill B", "Mill C", "Mill D").forEach((headerTitle) -> {
+        subTableHead.forEach(headerTitle -> {
             PdfPCell amountCell = new PdfPCell();
             amountCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             amountCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            amountCell.setPhrase(new Phrase("Importo Dovuto", headerFont));
+            amountCell.setPhrase(new Phrase("Importo Dovuto", font));
             table.addCell(amountCell);
 
             PdfPCell mill = new PdfPCell();
             mill.setHorizontalAlignment(Element.ALIGN_CENTER);
             mill.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            mill.setPhrase(new Phrase(headerTitle, headerFont));
+            mill.setPhrase(new Phrase(headerTitle, font));
             table.addCell(mill);
         });
 
-        table.addCell(emptyCell);
-        table.addCell(emptyCell);
-        table.addCell(emptyCell);
-        table.addCell(emptyCell);
-        table.addCell(emptyCell);
+        for(int i = 0; i < 5; i++){
+            table.addCell(emptyCell);
+        }
+    }
 
-        AtomicReference<Float> totalAmountTabA = new AtomicReference<>(0f);
-        AtomicReference<Float> totalAmountTabB = new AtomicReference<>(0f);
-        AtomicReference<Float> totalAmountTabC = new AtomicReference<>(0f);
-        AtomicReference<Float> totalAmountTabD = new AtomicReference<>(0f);
-        AtomicReference<Float> totalMillTabA = new AtomicReference<>(0f);
-        AtomicReference<Float> totalMillTabB = new AtomicReference<>(0f);
-        AtomicReference<Float> totalMillTabC = new AtomicReference<>(0f);
-        AtomicReference<Float> totalMillTabD = new AtomicReference<>(0f);
-        AtomicReference<Float> totalLastYearBalance = new AtomicReference<>(0f);
-        AtomicReference<Float> totalAmount = new AtomicReference<>(0f);
-        AtomicReference<Float> totalFirstBalance = new AtomicReference<>(0f);
-        AtomicReference<Float> totalOutlay = new AtomicReference<>(0f);
-        AtomicReference<Float> totalFinalBalance = new AtomicReference<>(0f);
+    private void addCell(PdfPTable table, String data) {
+        Font font = FontFactory.getFont(FontFactory.HELVETICA, 6, BaseColor.BLACK);
 
-        apartmentsDTO.forEach(apartment -> {
-            PdfPCell owner = new PdfPCell(new Phrase(apartment.getOwner(), bodyFont));
-            owner.setPadding(2);
-            owner.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            owner.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(owner);
+        PdfPCell cell = new PdfPCell(new Phrase(data, font));
+        cell.setPadding(2);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.addCell(cell);
+    }
 
-            Float totA = tableAppendixService.findTotalQuoteByCategory("A");
-            PdfPCell amountTabA = new PdfPCell(new Phrase(totA.toString(), bodyFont));
-            amountTabA.setPadding(2);
-            amountTabA.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            amountTabA.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(amountTabA);
+    private void addCell(PdfPTable table, String data, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(data, font));
+        cell.setPadding(2);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.addCell(cell);
+    }
 
-            PdfPCell millA = new PdfPCell(new Phrase(String.valueOf(apartment.getMillTabA()), bodyFont));
-            millA.setPadding(2);
-            millA.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            millA.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(millA);
+    private void addApartmentOutlayTable(Document document, List<ApartmentDTO> apartmentsDTO, int year) throws DocumentException{
+        PdfPTable table = new PdfPTable(14);
+        table.setWidthPercentage(100);
 
-            Float totB = tableAppendixService.findTotalQuoteByCategory("B");
-            PdfPCell amountTabB = new PdfPCell(new Phrase(totB.toString(), bodyFont));
-            amountTabB.setPadding(2);
-            amountTabB.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            amountTabB.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(amountTabB);
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, BaseColor.BLACK);
+        addApartmentTableHead(table);
 
-            PdfPCell millB = new PdfPCell(new Phrase(String.valueOf(apartment.getMillTabB()), bodyFont));
-            millB.setPadding(2);
-            millB.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            millB.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(millB);
+        float totalAmountTabA = 0f;
+        float totalAmountTabB = 0f;
+        float totalAmountTabC = 0f;
+        float totalAmountTabD = 0f;
+        float totalMillTabA = 0f;
+        float totalMillTabB = 0f;
+        float totalMillTabC = 0f;
+        float totalMillTabD = 0f;
+        float totalLastYearBalance = 0f;
+        float totalAmount = 0f;
+        float totalFirstBalance = 0f;
+        float totalOutlay = 0f;
+        float totalFinalBalance = 0f;
 
-            Float totC = tableAppendixService.findTotalQuoteByCategory("C");
-            PdfPCell amountTabC = new PdfPCell(new Phrase(totC.toString(), bodyFont));
-            amountTabC.setPadding(2);
-            amountTabC.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            amountTabC.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(amountTabC);
+        for(ApartmentDTO apartmentDTO : apartmentsDTO){
+            addCell(table, apartmentDTO.getOwner());
 
-            PdfPCell millC = new PdfPCell(new Phrase(String.valueOf(apartment.getMillTabC()), bodyFont));
-            millC.setPadding(2);
-            millC.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            millC.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(millC);
+            Float totA = tableAppendixService.findTotalQuoteByCategoryAndYear("A", year);
+            totA = totA == null ? 0 : totA;
+            addCell(table, totA.toString());
+            addCell(table, String.valueOf(apartmentDTO.getMillTabA()));
 
-            Float totD = tableAppendixService.findTotalQuoteByCategory("D");
-            PdfPCell amountTabD = new PdfPCell(new Phrase(totD.toString(), bodyFont));
-            amountTabD.setPadding(2);
-            amountTabD.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            amountTabD.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(amountTabD);
+            Float totB = tableAppendixService.findTotalQuoteByCategoryAndYear("B", year);
+            totB = totB == null ? 0 : totB;
+            addCell(table, totB.toString());
+            addCell(table, String.valueOf(apartmentDTO.getMillTabB()));
 
-            PdfPCell millD = new PdfPCell(new Phrase(String.valueOf(apartment.getMillTabD()), bodyFont));
-            millD.setPadding(2);
-            millD.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            millD.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(millD);
+            Float totC = tableAppendixService.findTotalQuoteByCategoryAndYear("C", year);
+            totC = totC == null ? 0 : totC;
+            addCell(table, totC.toString());
+            addCell(table, String.valueOf(apartmentDTO.getMillTabC()));
 
-            String lastYearBalanceStr = apartment.getLastYearBalance() == 0 ? "0" : String.valueOf(apartment.getLastYearBalance());
-            PdfPCell lastYearBalance = new PdfPCell(new Phrase(lastYearBalanceStr, bodyFont));
-            lastYearBalance.setPadding(2);
-            lastYearBalance.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            lastYearBalance.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(lastYearBalance);
+            Float totD = tableAppendixService.findTotalQuoteByCategoryAndYear("D", year);
+            totD = totD == null ? 0 : totD;
+            addCell(table, totD.toString());
+            addCell(table, String.valueOf(apartmentDTO.getMillTabD()));
 
-            Float totalOutlayTab = totA + totB + totC + totD;
-            PdfPCell totalOutlayCell = new PdfPCell(new Phrase(totalOutlayTab.toString(), bodyFont));
-            totalOutlayCell.setPadding(2);
-            totalOutlayCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            totalOutlayCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(totalOutlayCell);
+            String lastYearBalanceStr = apartmentDTO.getLastYearBalance() == 0 ? "0" : String.valueOf(apartmentDTO.getLastYearBalance());
+            addCell(table, lastYearBalanceStr);
 
-            Float firstBalance = apartment.getLastYearBalance() + totalOutlayTab;
-            PdfPCell firstBalanceCell = new PdfPCell(new Phrase(firstBalance.toString(), bodyFont));
-            firstBalanceCell.setPadding(2);
-            firstBalanceCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            firstBalanceCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(firstBalanceCell);
+            Float totalTabOutlay = totA + totB + totC + totD;
+            addCell(table, String.valueOf(totalTabOutlay));
 
-            Float amount = outlayService.totalAmountByApartmentId(apartment.getId()) == null ? 0f : outlayService.totalAmountByApartmentId(apartment.getId());
-            PdfPCell totalAmountCell = new PdfPCell(new Phrase(String.valueOf(amount), bodyFont));
-            totalAmountCell.setPadding(2);
-            totalAmountCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            totalAmountCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(totalAmountCell);
+            Float firstBalance = apartmentDTO.getLastYearBalance() + totalTabOutlay;
+            addCell(table, String.valueOf(firstBalance));
+
+            Float amount = outlayService.totalAmountByApartmentId(apartmentDTO.getId(), year);
+            amount = amount == null ? 0 : amount;
+            addCell(table, String.valueOf(amount));
 
             Float finalBalance = firstBalance + amount;
-            PdfPCell finalBalanceCell = new PdfPCell(new Phrase(finalBalance.toString(), bodyFont));
-            finalBalanceCell.setPadding(2);
-            finalBalanceCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            finalBalanceCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(finalBalanceCell);
+            addCell(table, String.valueOf(finalBalance));
 
-            totalAmountTabA.updateAndGet(v -> v + totA);
-            totalAmountTabB.updateAndGet(v -> v + totB);
-            totalAmountTabC.updateAndGet(v -> v + totC);
-            totalAmountTabD.updateAndGet(v -> v + totD);
-            totalMillTabA.updateAndGet(v -> v + apartment.getMillTabA());
-            totalMillTabB.updateAndGet(v -> v + apartment.getMillTabB());
-            totalMillTabC.updateAndGet(v -> v + apartment.getMillTabC());
-            totalMillTabD.updateAndGet(v -> v + apartment.getMillTabD());
-            totalLastYearBalance.updateAndGet(v -> v + apartment.getLastYearBalance());
-            totalOutlay.updateAndGet(v -> v + totalOutlayTab);
-            totalFirstBalance.updateAndGet(v -> v + firstBalance);
-            totalAmount.updateAndGet(v -> v + amount);
-            totalFinalBalance.updateAndGet(v -> v + finalBalance);
-        });
+            totalAmountTabA += totA;
+            totalAmountTabB += totB;
+            totalAmountTabC += totC;
+            totalAmountTabD += totD;
 
-        PdfPCell totalStr = new PdfPCell(new Phrase("Totale", headerFont));
-        totalStr.setPadding(2);
-        totalStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalStr);
+            totalMillTabA += apartmentDTO.getMillTabA();
+            totalMillTabB += apartmentDTO.getMillTabB();
+            totalMillTabC += apartmentDTO.getMillTabC();
+            totalMillTabD += apartmentDTO.getMillTabD();
 
-        PdfPCell totalAmountTabAStr = new PdfPCell(new Phrase("€" + totalAmountTabA , headerFont));
-        totalAmountTabAStr.setPadding(2);
-        totalAmountTabAStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalAmountTabAStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalAmountTabAStr);
+            totalLastYearBalance += apartmentDTO.getLastYearBalance();
+            totalOutlay += totalTabOutlay;
+            totalFirstBalance += firstBalance;
+            totalAmount += amount;
+            totalFinalBalance += finalBalance;
+        }
 
-        PdfPCell totalMillTabAStr = new PdfPCell(new Phrase(totalMillTabA.toString() , headerFont));
-        totalMillTabAStr.setPadding(2);
-        totalMillTabAStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalMillTabAStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalMillTabAStr);
+        String totalCell = "Totale";
+        addCell(table, totalCell);
 
-        PdfPCell totalAmountTabBStr = new PdfPCell(new Phrase("€" + totalAmountTabB , headerFont));
-        totalAmountTabBStr.setPadding(2);
-        totalAmountTabBStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalAmountTabBStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalAmountTabBStr);
+        addCell(table, "€" + totalAmountTabA, headerFont);
+        addCell(table, String.valueOf(totalMillTabA), headerFont);
 
-        PdfPCell totalMillTabBStr = new PdfPCell(new Phrase(totalMillTabB.toString() , headerFont));
-        totalMillTabBStr.setPadding(2);
-        totalMillTabBStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalMillTabBStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalMillTabBStr);
+        addCell(table, "€" + totalAmountTabB, headerFont);
+        addCell(table, String.valueOf(totalMillTabB), headerFont);
 
-        PdfPCell totalAmountTabCStr = new PdfPCell(new Phrase("€" + totalAmountTabC , headerFont));
-        totalAmountTabCStr.setPadding(2);
-        totalAmountTabCStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalAmountTabCStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalAmountTabCStr);
+        addCell(table, "€" + totalAmountTabC, headerFont);
+        addCell(table, String.valueOf(totalMillTabC), headerFont);
 
-        PdfPCell totalMillTabCStr = new PdfPCell(new Phrase(totalMillTabC.toString() , headerFont));
-        totalMillTabCStr.setPadding(2);
-        totalMillTabCStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalMillTabCStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalMillTabCStr);
+        addCell(table, "€" + totalAmountTabD, headerFont);
+        addCell(table, String.valueOf(totalMillTabD), headerFont);
 
-        PdfPCell totalAmountTabDStr = new PdfPCell(new Phrase("€" + totalAmountTabD , headerFont));
-        totalAmountTabDStr.setPadding(2);
-        totalAmountTabDStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalAmountTabDStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalAmountTabDStr);
-
-        PdfPCell totalMillTabDStr = new PdfPCell(new Phrase(totalMillTabD.toString() , headerFont));
-        totalMillTabDStr.setPadding(2);
-        totalMillTabDStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalMillTabDStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalMillTabDStr);
-
-        PdfPCell totalLastYearBalanceStr = new PdfPCell(new Phrase("€" + totalLastYearBalance , headerFont));
-        totalLastYearBalanceStr.setPadding(2);
-        totalLastYearBalanceStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalLastYearBalanceStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalLastYearBalanceStr);
-
-        PdfPCell totalOutlayStr = new PdfPCell(new Phrase("€" + totalOutlay , headerFont));
-        totalOutlayStr.setPadding(2);
-        totalOutlayStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalOutlayStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalOutlayStr);
-
-        PdfPCell totalFirstBalanceStr = new PdfPCell(new Phrase("€" + totalFirstBalance , headerFont));
-        totalFirstBalanceStr.setPadding(2);
-        totalFirstBalanceStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalFirstBalanceStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalFirstBalanceStr);
-
-        PdfPCell totalAmountStr = new PdfPCell(new Phrase("€" + totalAmount , headerFont));
-        totalAmountStr.setPadding(2);
-        totalAmountStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalAmountStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalAmountStr);
-
-        PdfPCell totalFinalBalanceStr = new PdfPCell(new Phrase("€" + totalFinalBalance , headerFont));
-        totalFinalBalanceStr.setPadding(2);
-        totalFinalBalanceStr.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        totalFinalBalanceStr.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(totalFinalBalanceStr);
+        addCell(table, "€" + totalLastYearBalance, headerFont);
+        addCell(table, "€" + totalOutlay, headerFont);
+        addCell(table, "€" + totalFirstBalance, headerFont);
+        addCell(table, "€" + totalAmount, headerFont);
+        addCell(table, "€" + totalFinalBalance, headerFont);
 
         document.add(table);
         document.add(Chunk.NEWLINE);
@@ -392,7 +391,7 @@ public class ReportServiceImpl implements ReportService {
         Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 8, BaseColor.BLACK);
 
 
-        Stream.of( "Data", "Descrizione", "Importo", "Operazione", "Pagamento", "Spesa", "Tabella").forEach((headerTitle) -> {
+        Stream.of( "Data", "Descrizione", "Importo", "Operazione", "Pagamento", "Spesa", "Tabella").forEach(headerTitle -> {
             PdfPCell header = new PdfPCell();
             header.setHorizontalAlignment(Element.ALIGN_CENTER);
             header.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -402,7 +401,7 @@ public class ReportServiceImpl implements ReportService {
         });
 
         outlayDTOs.forEach(outlay -> {
-            Timestamp timestamp = outlay.getCreated_at();
+            Timestamp timestamp = outlay.getCreatedAt();
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
             String dateStr = localDateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
@@ -459,10 +458,11 @@ public class ReportServiceImpl implements ReportService {
         totalStr.setColspan(2);
         table.addCell(totalStr);
 
-        Float total = 0f;
+        float total = 0f;
         for(OutlayDTO outlayDTO : outlayDTOs) {
             total += outlayDTO.getAmount();
         }
+
         PdfPCell totalAmount = new PdfPCell(new Phrase("€ " + total, headerFont));
         totalAmount.setPadding(2);
         totalAmount.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -474,38 +474,6 @@ public class ReportServiceImpl implements ReportService {
         document.add(Chunk.NEWLINE);
     }
 
-    private void addQuoteTable(Document document, CondominiumDTO condominiumDTO) throws DocumentException {
-        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
-        Paragraph title = new Paragraph("Preventivi" ,titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(Chunk.NEWLINE);
-
-        List<QuoteDTO> quoteTabA = condominiumDTO.getQuotes()
-                .stream()
-                .filter(quote -> quote.getTable().getCategory().equals("A"))
-                .toList();
-        addTableQuote("Tabella A", document, quoteTabA);
-
-        List<QuoteDTO> quoteTabB = condominiumDTO.getQuotes()
-                .stream()
-                .filter(quote -> quote.getTable().getCategory().equals("B"))
-                .toList();
-        addTableQuote("Tabella B", document, quoteTabB);
-
-        List<QuoteDTO> quoteTabC = condominiumDTO.getQuotes()
-                .stream()
-                .filter(quote -> quote.getTable().getCategory().equals("C"))
-                .toList();
-        addTableQuote("Tabella C", document, quoteTabC);
-
-        List<QuoteDTO> quoteTabD = condominiumDTO.getQuotes()
-                .stream()
-                .filter(quote -> quote.getTable().getCategory().equals("D"))
-                .toList();
-        addTableQuote("Tabella D", document, quoteTabD);
-    }
-
     private void addTableQuote(String tableTitle, Document document, List<QuoteDTO> quotes) throws DocumentException {
         PdfPTable table = new PdfPTable(2);
         float[] widths = new float[] {2f, 1f };
@@ -515,11 +483,11 @@ public class ReportServiceImpl implements ReportService {
 
         PdfPCell titleCell = new PdfPCell(new Phrase(tableTitle, headerFont));
         titleCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        titleCell.setColspan(2);
         titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        titleCell.setColspan(2);
         table.addCell(titleCell);
 
-        Stream.of( "Descrizione", "Preventivo").forEach((headerTitle) -> {
+        Stream.of( "Descrizione", "Preventivo").forEach(headerTitle -> {
             PdfPCell header = new PdfPCell();
             header.setHorizontalAlignment(Element.ALIGN_CENTER);
             header.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -528,40 +496,16 @@ public class ReportServiceImpl implements ReportService {
             table.addCell(header);
         });
 
-        quotes.forEach( quote -> {
-            PdfPCell description = new PdfPCell(new Phrase(quote.getTable().getDescription(), bodyFont));
-            description.setPadding(2);
-            description.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            description.setHorizontalAlignment(Element.ALIGN_LEFT);
-            table.addCell(description);
+        for(QuoteDTO quoteDTO : quotes) {
+            addCell(table, quoteDTO.getTable().getDescription(), bodyFont);
 
-            String totalAmountStr = quote.getTotalAmount() == 0 ? "0" : String.valueOf(quote.getTotalAmount());
-            PdfPCell totalAmount = new PdfPCell(new Phrase(totalAmountStr, bodyFont));
-            totalAmount.setPadding(2);
-            totalAmount.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            totalAmount.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(totalAmount);
-        });
+            String totalAmountStr = quoteDTO.getTotalAmount() == 0 ? "0" : String.valueOf(quoteDTO.getTotalAmount());
+            addCell(table, totalAmountStr, bodyFont);
+        }
 
         document.add(table);
         document.add(Chunk.NEWLINE);
     }
-    private Report mapDTOToEntity(ReportDTO reportDTO) {
-        Condominium condominium = condominiumRepository.findCondominiumByReportId(reportDTO.getId());
 
-        return Report.builder()
-                .id(reportDTO.getId())
-                .path_file(reportDTO.getPathFile())
-                .created_at(reportDTO.getCreated_at())
-                .condominium(condominium)
-                .build();
-    }
 
-    private ReportDTO mapEntityToDTO(Report report) {
-        return ReportDTO.builder()
-                .id(report.getId())
-                .pathFile(report.getPath_file())
-                .created_at(report.getCreated_at())
-                .build();
-    }
 }

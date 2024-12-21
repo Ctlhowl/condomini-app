@@ -25,7 +25,7 @@
                         <td>{{condominium.address}}</td>
                         <td>{{condominium.apartments?.length}}</td>
                         <td>{{condominium.lastYearBalance}}</td>
-                        <td><a class="btn" (click)="exportToPDF(condominium)"><img src="assets/pdf.png"></a></td>
+                        <td><a class="btn"  data-bs-toggle="modal" data-bs-target="#exportModal" (click)="opendExportToPDFModal(condominium)"><img src="assets/pdf.png"></a></td>
                         <td><a class="btn btn-success" [routerLink]="['/condominium/apartments', condominium.id]" routerLinkActive="router-link-active"  >Accedi</a></td>
                         <td><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCondominium" (click)="onOpenEditCondominiumModal(condominium)">Modifica</button></td>
                         <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCondominium" (click)="onOpenDeleteCondominiumModal(condominium)">Elimina</button></td>
@@ -44,6 +44,31 @@
         </div>
     </div>
 
+    <!-- Export To Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exportModalLabel">Genera PDF</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="exportForm" (ngSubmit)="onExportToPDF()">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Anno</label>
+                    <input type="hidden" class="form-control" id="id" formControlName="id">
+                    <input type="number" class="form-control" id="datepicker"  min="2023" max="2100" formControlName="year">
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="export-Form" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-success" [disabled]="exportForm.invalid">Genera</button>
+                </div>
+                </form>
+            </div>
+          </div>
+        </div>
+    </div>
 
     <!-- Add Condominium Modal -->
     <div class="modal fade" id="addCondominium" tabindex="-1" aria-labelledby="addCondominiumLabel" aria-hidden="true">
@@ -80,7 +105,7 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
       
     <!-- Edit Condominium Modal -->
     <div class="modal fade" id="editCondominium" tabindex="-1" aria-labelledby="editCondominiumLabel" aria-hidden="true">
@@ -141,3 +166,11 @@
 </div>
 
 <router-outlet></router-outlet>
+
+<script>
+$("#datepicker").datepicker({
+    format: "yyyy",
+    viewMode: "years", 
+    minViewMode: "years"
+});
+</script>

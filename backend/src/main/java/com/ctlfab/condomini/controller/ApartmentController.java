@@ -1,9 +1,8 @@
 package com.ctlfab.condomini.controller;
 
-import com.ctlfab.condomini.DTO.ApartmentDTO;
+import com.ctlfab.condomini.dto.ApartmentDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.ApartmentService;
-import com.ctlfab.condomini.service.CondominiumService;
 import com.ctlfab.condomini.service.OutlayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +52,7 @@ public class ApartmentController {
     }
 
     @PutMapping("/edit")
-    private ResponseEntity<Response> editApartment(@PathVariable(value = "condominiumId", required = false) Long condominiumId,
+    public ResponseEntity<Response> editApartment(@PathVariable(value = "condominiumId", required = false) Long condominiumId,
                                                    @RequestParam(value = "id") long id,
                                                    @RequestBody @Valid ApartmentDTO apartmentDTO) {
         apartmentDTO.setId(id);

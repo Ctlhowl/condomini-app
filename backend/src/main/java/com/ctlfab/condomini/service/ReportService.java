@@ -1,14 +1,9 @@
 package com.ctlfab.condomini.service;
 
-import com.ctlfab.condomini.DTO.CondominiumDTO;
-import com.ctlfab.condomini.DTO.ReportDTO;
+import com.ctlfab.condomini.dto.CondominiumDTO;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collection;
 
 public interface ReportService {
-    ReportDTO saveReport(ReportDTO reportDTO);
-    ReportDTO findReportById(Long reportId);
-    Collection<ReportDTO> findAllReportByCondominiumId(Long condominiumId);
-    ByteArrayInputStream exportToPDF(CondominiumDTO condominiumDTO);
+    ByteArrayInputStream exportToPDF(CondominiumDTO condominiumDTO, int year);
 }

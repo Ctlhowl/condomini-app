@@ -1,7 +1,7 @@
 package com.ctlfab.condomini.service.implementation;
 
-import com.ctlfab.condomini.DTO.OutlayDTO;
-import com.ctlfab.condomini.DTO.TableAppendixDTO;
+import com.ctlfab.condomini.dto.OutlayDTO;
+import com.ctlfab.condomini.dto.TableAppendixDTO;
 import com.ctlfab.condomini.model.Apartment;
 import com.ctlfab.condomini.model.Condominium;
 import com.ctlfab.condomini.model.Outlay;
@@ -10,6 +10,7 @@ import com.ctlfab.condomini.repository.ApartmentRepository;
 import com.ctlfab.condomini.repository.CondominiumRepository;
 import com.ctlfab.condomini.repository.OutlayRepository;
 import com.ctlfab.condomini.repository.TableAppendixRepository;
+import com.ctlfab.condomini.service.MyUtils;
 import com.ctlfab.condomini.service.OutlayService;
 import com.ctlfab.condomini.service.TableAppendixService;
 import jakarta.transaction.Transactional;
@@ -34,13 +35,14 @@ public class OutlayServiceImpl implements OutlayService {
     private final TableAppendixRepository tableAppendixRepository;
     private final ApartmentRepository apartmentRepository;
     private final CondominiumRepository condominiumRepository;
+    private final MyUtils myUtils;
 
     @Override
     public List<OutlayDTO> findApartmentOutlaysByApartmentId(Long apartmentId) {
         logger.info("Fetching apartment outlays by apartment ID: {}", apartmentId);
         List<OutlayDTO> outlays = new LinkedList<>();
 
-        for(Outlay outlay : outlayRepository.findApartmentOutlaysByApartmentId(apartmentId)){
+        for(Outlay outlay : outlayRepository.findApartmentOutlaysByApartmentId(apartmentId, myUtils.startDateTime(), myUtils.endDateTime())) {
             outlays.add(mapEntityToDTO(outlay));
         }
 
@@ -48,11 +50,37 @@ public class OutlayServiceImpl implements OutlayService {
     }
 
     @Override
+    public List<OutlayDTO> findApartmentOutlaysByApartmentIdAndYear(Long apartmentId, int year) {
+        logger.info("Fetching apartment outlays {} by apartment ID: {}", year, apartmentId);
+        List<OutlayDTO> outlays = new LinkedList<>();
+
+        for(Outlay outlay : outlayRepository.findApartmentOutlaysByApartmentId(apartmentId, myUtils.startDateTime(year), myUtils.endDateTime(year))) {
+            outlays.add(mapEntityToDTO(outlay));
+        }
+
+        return outlays;
+    }
+
+
+    @Override
     public List<OutlayDTO> findAllOutlaysByCondominiumId(Long condominiumId) {
         logger.info("Fetching all outlays by condominium ID: {}", condominiumId);
         List<OutlayDTO> outlays = new LinkedList<>();
 
-        for(Outlay outlay : outlayRepository.findCondominiumOutlaysByCondominiumId(condominiumId)){
+        for(Outlay outlay : outlayRepository.findCondominiumOutlaysByCondominiumId(condominiumId, myUtils.startDateTime(), myUtils.endDateTime())){
+            outlays.add(mapEntityToDTO(outlay));
+        }
+
+        return outlays;
+    }
+
+
+    @Override
+    public List<OutlayDTO> findAllOutlaysByCondominiumIdAndYear(Long condominiumId, int year) {
+        logger.info("Fetching all outlays {} by condominium ID: {}", year, condominiumId);
+        List<OutlayDTO> outlays = new LinkedList<>();
+
+        for(Outlay outlay : outlayRepository.findCondominiumOutlaysByCondominiumId(condominiumId, myUtils.startDateTime(year), myUtils.endDateTime(year))){
             outlays.add(mapEntityToDTO(outlay));
         }
 
@@ -84,9 +112,9 @@ public class OutlayServiceImpl implements OutlayService {
     }
 
     @Override
-    public Float totalAmountByApartmentId(Long apartmentId) {
-        logger.info("Fetching total amount of outlay by Apartment Id: {} ", apartmentId);
-        return outlayRepository.totalAmountByApartmentId(apartmentId);
+    public Float totalAmountByApartmentId(Long apartmentId, int year) {
+        logger.info("Fetching total amount of outlay {} by Apartment Id: {} ", year, apartmentId);
+        return outlayRepository.totalAmountByApartmentId(apartmentId, myUtils.startDateTime(year), myUtils.endDateTime(year));
     }
 
     private OutlayDTO mapEntityToDTO(Outlay outlay) {
@@ -95,7 +123,7 @@ public class OutlayServiceImpl implements OutlayService {
         return OutlayDTO.builder()
                 .id(outlay.getId())
                 .amount(outlay.getAmount())
-                .created_at(outlay.getCreatedAt())
+                .createdAt(outlay.getCreatedAt())
                 .description(outlay.getDescription())
                 .operationType(outlay.getOperationType())
                 .outlayType(outlay.getOutlayType())
@@ -112,7 +140,7 @@ public class OutlayServiceImpl implements OutlayService {
         return Outlay.builder()
                 .id(outlayDTO.getId())
                 .amount(outlayDTO.getAmount())
-                .createdAt(outlayDTO.getCreated_at())
+                .createdAt(outlayDTO.getCreatedAt())
                 .description(outlayDTO.getDescription())
                 .operationType(outlayDTO.getOperationType())
                 .outlayType(outlayDTO.getOutlayType())

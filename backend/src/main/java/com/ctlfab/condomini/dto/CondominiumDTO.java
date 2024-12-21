@@ -1,6 +1,5 @@
-package com.ctlfab.condomini.DTO;
+package com.ctlfab.condomini.dto;
 
-import com.ctlfab.condomini.model.Quote;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
@@ -23,8 +22,6 @@ public class CondominiumDTO {
     private List<OutlayDTO> outlays;
 
     private List<ApartmentDTO> apartments;
-
-    private List<ReportDTO> reports;
 
     private List<QuoteDTO> quotes;
 

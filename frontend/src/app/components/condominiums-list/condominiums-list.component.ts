@@ -20,6 +20,7 @@ export class CondominiumsListComponent implements OnInit {
 
   addForm!: FormGroup;
   editForm!: FormGroup;
+  exportForm!: FormGroup;
 
   deleteCondominium?: Condominium;
 
@@ -28,9 +29,18 @@ export class CondominiumsListComponent implements OnInit {
   ngOnInit(): void {
     this.condominiumService.clearSelectedCondominium();
 
+    
+    this.createExportForm();
     this.createAddForm();
     this.createEditForm();
     this.getCondominiums();
+  }
+
+  private createExportForm() {
+    this.exportForm = new FormGroup({
+      id: new FormControl(null, Validators.required),
+      year: new FormControl(new Date().getFullYear(), Validators.required) 
+    });
   }
 
   private createAddForm() {
@@ -66,6 +76,10 @@ export class CondominiumsListComponent implements OnInit {
       });
   }
 
+  public opendExportToPDFModal(condominium: Condominium) {
+    this.exportForm.get('id')?.setValue(condominium.id);
+  }
+
   public onOpenEditCondominiumModal(condominium: Condominium) {
     this.editForm.get('id')?.setValue(condominium.id);
     this.editForm.get('name')?.setValue(condominium.name);
@@ -84,6 +98,26 @@ export class CondominiumsListComponent implements OnInit {
     );
   }
 
+  public onExportToPDF(): void{
+    document.getElementById('export-Form')?.click();
+
+    this.condominiumService.exportPDF(this.exportForm.get('id')?.value, this.exportForm.get('year')?.value).subscribe((pdf) => {
+      const blob = new Blob([pdf], { type: 'application/pdf' });
+
+      const data = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = data;
+
+      let dateTime = new Date();
+      link.download = `${dateTime.toLocaleString().split(',')[0]}_report.pdf`;
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+      setTimeout(function () {
+        window.URL.revokeObjectURL(data);
+        link.remove();
+      }, 100);
+    });
+  }
 
   public onUpdateCondominium(): void{
     document.getElementById('edit-condominiumForm')?.click();
@@ -106,24 +140,5 @@ export class CondominiumsListComponent implements OnInit {
     this.condominiumService.deleteCondominium(condominiumId).subscribe(
       () => {this.getCondominiums();}
     );
-  }
-
-  public exportToPDF(condominium: Condominium) {
-    this.condominiumService.exportPDF(condominium.id).subscribe((pdf) => {
-      const blob = new Blob([pdf], { type: 'application/pdf' });
-
-      const data = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = data;
-
-      let dateTime = new Date();
-      link.download = `${dateTime.toLocaleString().split(',')[0]}_report.pdf`;
-      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-
-      setTimeout(function () {
-        window.URL.revokeObjectURL(data);
-        link.remove();
-      }, 100);
-    });
   }
 }

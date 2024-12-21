@@ -36,9 +36,6 @@ public class Condominium {
     private List<Apartment> apartments;
 
     @OneToMany(mappedBy = "condominium", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Report> reports;
-
-    @OneToMany(mappedBy = "condominium", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Quote> quotes;
 
     @Override

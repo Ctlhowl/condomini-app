@@ -11,9 +11,6 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Long> {
     @Query("SELECT a FROM Apartment a WHERE a.condominium.id = :condominiumId")
     List<Apartment> findApartmentsByCondominiumId(long condominiumId);
 
-    @Query("SELECT a FROM Outlay o JOIN o.apartment a ON a.id = o.apartment.id WHERE o.id = :outlayId")
-    Apartment findApartmentsByByOutlayId(Long outlayId);
-
-    @Query("SELECT a FROM Apartment a ORDER BY a.id ASC ")
-    Apartment findByIdOrderById(Long id);
+    @Query(value = "CALL new_apartment_last_year_balance(:id, :newBalance)", nativeQuery = true)
+    void setNewLastYearBalance(long id, float newBalance);
 }

@@ -101,6 +101,9 @@ export class ApartmentOutlayComponent implements OnInit{
           },
           error: (err) => {
             this.errorMessage = err.error?.message || 'Failed to load outlays';
+          },
+          complete: () => {
+            console.log(this.outlays);  
           }
         }
       )

@@ -1,10 +1,8 @@
 package com.ctlfab.condomini.controller;
 
-import com.ctlfab.condomini.DTO.ApartmentDTO;
-import com.ctlfab.condomini.DTO.QuoteDTO;
+import com.ctlfab.condomini.dto.QuoteDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.ApartmentService;
-import com.ctlfab.condomini.service.CondominiumService;
 import com.ctlfab.condomini.service.QuoteService;
 import com.ctlfab.condomini.service.TableAppendixService;
 import jakarta.validation.Valid;
@@ -45,13 +43,14 @@ public class QuoteController {
                                                     @RequestParam(value = "tableId") long tableId) {
 
         QuoteDTO quoteDTO = quoteService.findQuoteByCondominiumAndTableId(condominiumId, tableId);
+        final String key = "quote";
 
         if(quoteDTO == null) {
             return  ResponseEntity.ok(
                     Response.builder()
                             .timestamp(now())
-                            .data(Map.of("quote", new QuoteDTO()))
-                            .message("Quotes retrieved")
+                            .data(Map.of(key, new QuoteDTO()))
+                            .message("Quote retrieved")
                             .httpStatus(NO_CONTENT)
                             .statusCode(NO_CONTENT.value())
                             .build()
@@ -61,7 +60,7 @@ public class QuoteController {
         return  ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())
-                        .data(Map.of("quote", quoteDTO))
+                        .data(Map.of(key, quoteDTO))
                         .message("Quotes retrieved")
                         .httpStatus(OK)
                         .statusCode(OK.value())
@@ -85,7 +84,7 @@ public class QuoteController {
     }
 
     @PutMapping("/edit")
-    private ResponseEntity<Response> editQuote(@RequestParam(value = "id") long id,
+    public ResponseEntity<Response> editQuote(@RequestParam(value = "id") long id,
                                                    @PathVariable(value = "condominiumId") long condominiumId,
                                                    @RequestBody QuoteDTO quoteDTO) {
         quoteDTO.setId(id);

@@ -25,7 +25,7 @@
                 <tbody>
                     @for(outlay of outlays; track $index){
                     <tr>
-                        <td>{{outlay.created_at.split('T')[0]}}</td>
+                        <td>{{outlay.createdAt.split('T')[0]}}</td>
                         <td>{{outlay.description}}</td>
                         <td>€ {{outlay.amount}} </td>
                         <td>{{outlay.operationType}}</td>

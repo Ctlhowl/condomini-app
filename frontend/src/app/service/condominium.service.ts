@@ -44,7 +44,7 @@ export class CondominiumService {
   }
 
 
-  public exportPDF(condominiumId: number): Observable<Blob>{
-    return this.http.get(`${this.apiServerUrl}/export/${condominiumId}`, {responseType: 'blob'});
+  public exportPDF(condominiumId: number, year: number): Observable<Blob>{
+    return this.http.get(`${this.apiServerUrl}/export/${condominiumId}`, {responseType: 'blob', params: {year: year}});
   }
 }

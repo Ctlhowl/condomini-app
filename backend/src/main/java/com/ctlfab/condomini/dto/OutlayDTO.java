@@ -1,4 +1,4 @@
-package com.ctlfab.condomini.DTO;
+package com.ctlfab.condomini.dto;
 
 import com.ctlfab.condomini.enumeration.OperationType;
 import com.ctlfab.condomini.enumeration.OutlayType;
@@ -23,7 +23,7 @@ public class OutlayDTO {
     private OperationType operationType;
 
     @CreationTimestamp
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
     @DecimalMin(value = "0.00", message = "La spesa dovrebbe avere un importo")
     private float amount;
@@ -45,7 +45,7 @@ public class OutlayDTO {
         return "OutlayDTO{" +
                 "id=" + id +
                 ", operationType=" + operationType +
-                ", created_at=" + created_at +
+                ", created_at=" + createdAt +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
                 ", paymentMethod=" + paymentMethod +

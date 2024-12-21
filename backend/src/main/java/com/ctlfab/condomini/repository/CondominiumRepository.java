@@ -8,10 +8,9 @@ import java.util.List;
 
 
 public interface CondominiumRepository extends JpaRepository<Condominium, Long> {
-
-    @Query("SELECT c FROM Condominium c JOIN c.reports r ON c.id = r.condominium.id WHERE r.id = :reportId")
-    Condominium findCondominiumByReportId(Long reportId);
-
     @Query("SELECT c FROM Condominium c ORDER BY c.id ASC")
     List<Condominium> findAllOrderById();
+
+    @Query(value = "CALL new_condominium_last_year_balance(:id, :newBalance)", nativeQuery = true)
+    void setNewLastYearBalance(long id, float newBalance);
 }

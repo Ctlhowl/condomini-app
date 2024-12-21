@@ -1,6 +1,6 @@
 package com.ctlfab.condomini.controller;
 
-import com.ctlfab.condomini.DTO.CondominiumDTO;
+import com.ctlfab.condomini.dto.CondominiumDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.CondominiumService;
 import com.ctlfab.condomini.service.ReportService;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
@@ -62,7 +61,7 @@ public class CondominiumController {
         return ResponseEntity.ok(
                 Response.builder()
                         .timestamp(now())
-                        .data(Map.of("condominium", condominiumService.saveCondominium(condominium)))
+                        .data(Map.of("newCondominium", condominiumService.saveCondominium(condominium)))
                         .message("Condominium created")
                         .httpStatus(CREATED)
                         .statusCode(CREATED.value())
@@ -71,7 +70,7 @@ public class CondominiumController {
     }
 
     @PutMapping("/edit")
-    private ResponseEntity<Response> editCondominium(@RequestParam(value = "id") long id, @RequestBody @Valid CondominiumDTO condominium) {
+    public ResponseEntity<Response> editCondominium(@RequestParam(value = "id") long id, @RequestBody @Valid CondominiumDTO condominium) {
         condominium.setId(id);
 
         return ResponseEntity.ok(
@@ -99,12 +98,14 @@ public class CondominiumController {
     }
 
     @GetMapping("/export/{condominiumId}")
-    public ResponseEntity<InputStreamResource> exportCondominium(@PathVariable(value = "condominiumId") long condominiumId) {
-        CondominiumDTO condominiumDTO = condominiumService.findCondominiumById(condominiumId);
-        ByteArrayInputStream bais = reportService.exportToPDF(condominiumDTO);
+    public ResponseEntity<InputStreamResource> exportCondominium(@PathVariable(value = "condominiumId") long condominiumId,
+                                                                 @RequestParam(value = "year") int year) {
+
+        CondominiumDTO condominiumDTO = condominiumService.findCondominiumByIdAndYear(condominiumId, year);
+        ByteArrayInputStream bais = reportService.exportToPDF(condominiumDTO, year);
 
         HttpHeaders headers = new HttpHeaders();
-        String filename = now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy")) + "_report.pdf";
+        String filename = year + "_report.pdf";
         headers.add("Content-Disposition", "inline; filename=" + filename);
 
         return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(bais));

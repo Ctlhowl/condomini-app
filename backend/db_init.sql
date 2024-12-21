@@ -25,17 +25,6 @@ CREATE TABLE condomini_app.apartment(
     CONSTRAINT fk_condominium_id FOREIGN KEY (condominium_id) REFERENCES condomini_app.condominium(id) ON DELETE CASCADE
 );
 
-
-CREATE TABLE condomini_app.report(
-    id SERIAL PRIMARY KEY,
-    path_file VARCHAR(255) NOT NULL UNIQUE,
-    condominium_id INTEGER NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-
-    CONSTRAINT fk_condominium_id FOREIGN KEY (condominium_id) REFERENCES condomini_app.condominium(id) ON DELETE CASCADE
-);
-
-
 CREATE TABLE condomini_app.table_appendix(
     id SERIAL PRIMARY KEY,
     category VARCHAR(255) NOT NULL,
@@ -74,26 +63,6 @@ CREATE TABLE condomini_app.outlay(
 
 
 -- Valori iniziali tabelle
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Spese Amministratore', 'A');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Pulizia Aree Comuni', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Spese Sicurezza', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Manutenzione Ordinaria Aree Comuni', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Gestione del Sistema Idraulico Comune', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Spese Ascensore', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Riparazioni e Manutenzioni Straordinarie', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Altre Spese Generali', 'B');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Costi del Combustibile', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Manutenzione Ordinaria Impianto di Riscaldamento', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Riparazioni e Manutenzioni Straordinarie', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Costi Energetici', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Contabilizzazione del Calore ', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Assicurazione Impianto di Riscaldamento', 'C');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Costi della Fornitura d’Acqua', 'D');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Manutenzione Ordinaria dell’Impianto Idrico', 'D');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Riparazioni e Manutenzioni Straordinarie', 'D');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Costi per il Controllo e la Misurazione dei Consumi', 'D');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Consumi Aree Comuni', 'D');
-INSERT INTO condomini_app.table_appendix(id, description, category) VALUES (nextval('condomini_app.table_appendix_id_seq'), 'Assicurazione Impianto Idrico', 'D');
 
 
 -- Descrizione: Alla creazione di un nuovo condominio crea un preventivo a 0 per ogni tabella 

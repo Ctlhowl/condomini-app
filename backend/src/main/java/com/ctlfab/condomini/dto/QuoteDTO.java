@@ -1,4 +1,4 @@
-package com.ctlfab.condomini.DTO;
+package com.ctlfab.condomini.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;

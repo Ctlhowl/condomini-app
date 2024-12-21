@@ -1,6 +1,6 @@
 package com.ctlfab.condomini.controller;
 
-import com.ctlfab.condomini.DTO.OutlayDTO;
+import com.ctlfab.condomini.dto.OutlayDTO;
 import com.ctlfab.condomini.model.Response;
 import com.ctlfab.condomini.service.OutlayService;
 import jakarta.validation.Valid;
@@ -68,7 +68,7 @@ public class OutlayController {
     }
 
     @PutMapping("/edit")
-    private ResponseEntity<Response> editOutlay(@PathVariable(value = "condominiumId") long condominiumId,
+    public ResponseEntity<Response> editOutlay(@PathVariable(value = "condominiumId") long condominiumId,
                                                @RequestParam(value = "outlayId") long outlayId,
                                                @RequestParam(value = "apartmentId", required = false) Long apartmentId,
                                                @Valid @RequestBody OutlayDTO outlayDTO) {
