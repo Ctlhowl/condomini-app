@@ -26,8 +26,8 @@ public class TableAppendix {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToOne(mappedBy = "table", cascade = CascadeType.ALL)
-    private Quote quote;
+    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
+    private List<Quote> quotes;
 
     @OneToMany(mappedBy = "table")
     private List<Outlay> outlays;

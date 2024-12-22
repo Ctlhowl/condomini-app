@@ -25,7 +25,7 @@ public class Quote {
     @Column(name = "total_amount", nullable = false)
     private float totalAmount;
 
-    @OneToOne
+    @ManyToOne
     @NotNull(message = "Il preventivo dovrebbe essere associato ad una tabella di riferimento")
     @JoinColumn(name = "table_id", nullable = false)
     private TableAppendix table;
@@ -36,7 +36,7 @@ public class Quote {
     private Condominium condominium;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
     @Override

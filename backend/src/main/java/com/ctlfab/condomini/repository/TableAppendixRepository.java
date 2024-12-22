@@ -8,9 +8,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface TableAppendixRepository extends JpaRepository<TableAppendix, Long> {
-    @Query("SELECT SUM(t.quote.totalAmount) FROM TableAppendix t WHERE t.category = :category")
+    @Query("SELECT SUM(q.totalAmount) FROM TableAppendix t JOIN t.quotes q WHERE t.category = :category")
     Float findTotalQuoteByCategory(String category);
 
-    @Query("SELECT SUM(q.totalAmount) FROM TableAppendix t JOIN t.quote q WHERE t.category = :category AND q.createdAt > :startDate AND q.createdAt < :endDate")
+    @Query("SELECT SUM(q.totalAmount) FROM TableAppendix t JOIN t.quotes q WHERE t.category = :category AND q.createdAt > :startDate AND q.createdAt < :endDate")
     Float findTotalQuoteByCategoryAndYear(String category, Timestamp startDate, Timestamp endDate);
 }

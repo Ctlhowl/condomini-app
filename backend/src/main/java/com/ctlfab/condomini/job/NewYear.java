@@ -4,25 +4,25 @@ import com.ctlfab.condomini.dto.ApartmentDTO;
 import com.ctlfab.condomini.dto.CondominiumDTO;
 import com.ctlfab.condomini.repository.ApartmentRepository;
 import com.ctlfab.condomini.repository.CondominiumRepository;
+import com.ctlfab.condomini.service.ApartmentService;
 import com.ctlfab.condomini.service.CondominiumService;
 import com.ctlfab.condomini.service.OutlayService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.Year;
 
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Service
-@Transactional
+@Component
 public class NewYear {
     private final CondominiumService condominiumService;
     private final ApartmentRepository apartmentRepository;
     private final OutlayService outlayService;
     private final CondominiumRepository condominiumRepository;
+    private final ApartmentService apartmentService;
 
     @Scheduled(cron = "0 50 23 31 12 *")
     public void setNewLastYearBalance(){
@@ -31,13 +31,19 @@ public class NewYear {
 
             for(ApartmentDTO apartmentDTO : condominiumDTO.getApartments()){
                 Float totalOutlay = outlayService.totalAmountByApartmentId(apartmentDTO.getId(), Year.now().getValue());
-                float newApartmentLastYearBalance = condominiumDTO.getLastYearBalance() + totalOutlay;
-                newCondominiumLastYearBalance += newApartmentLastYearBalance;
+                if(totalOutlay == null){
+                    totalOutlay = 0f;
+                }
 
-                apartmentRepository.setNewLastYearBalance(apartmentDTO.getId(), newApartmentLastYearBalance);
+                float newApartmentLastYearBalance = apartmentDTO.getLastYearBalance() + totalOutlay;
+                newCondominiumLastYearBalance += newApartmentLastYearBalance;
+                apartmentDTO.setLastYearBalance(newApartmentLastYearBalance);
+
+                apartmentService.updateApartment(apartmentDTO, condominiumDTO.getId());
             }
 
-            condominiumRepository.setNewLastYearBalance(condominiumDTO.getId(), newCondominiumLastYearBalance);
+            condominiumDTO.setLastYearBalance(newCondominiumLastYearBalance);
+            condominiumService.updateCondominium(condominiumDTO);
         }
     }
 }

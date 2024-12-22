@@ -47,6 +47,7 @@ export class CondominiumOutlayComponent implements OnInit{
   private createAddForm() {
     this.addForm = new FormGroup({
       description: new FormControl(null, Validators.required),
+      createdAt: new FormControl(new Date(), [Validators.required]),
       amount: new FormControl(null, [Validators.required, Validators.min(0)]),
       operationType: new FormControl('ENTRATA', Validators.required),
       paymentMethod: new FormControl('BANCA', Validators.required),
@@ -59,6 +60,7 @@ export class CondominiumOutlayComponent implements OnInit{
     this.editForm = new FormGroup({
       id: new FormControl(null, Validators.required),
       description: new FormControl(null, Validators.required),
+      createdAt: new FormControl(new Date(), [Validators.required]),
       amount: new FormControl(null, [Validators.required, Validators.min(0)]),
       operationType: new FormControl('ENTRATA', Validators.required),
       paymentMethod: new FormControl('BANCA', Validators.required),
@@ -105,6 +107,7 @@ export class CondominiumOutlayComponent implements OnInit{
   public onOpenEditOutlayModal(outlay: Outlay) {
     this.editForm.get('id')?.setValue(outlay.id);
     this.editForm.get('description')?.setValue(outlay.description);
+    this.editForm.get('createdAt')?.setValue(outlay.createdAt);
     this.editForm.get('amount')?.setValue(outlay.amount);
     this.editForm.get('operationType')?.setValue(outlay.operationType);
     this.editForm.get('paymentMethod')?.setValue(outlay.paymentMethod);

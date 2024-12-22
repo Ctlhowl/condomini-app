@@ -40,7 +40,7 @@
                 <tfoot>
                     <tr>
                         <td colspan="2"><b>Totale</b></td>
-                        <td><b>€ {{getTotalOutlay()}}</b></td>
+                        <td><b>€ {{getTotalOutlay().toFixed(2)}}</b></td>
                         <td colspan="6"></td>
                     </tr>
                 </tfoot>
@@ -112,6 +112,13 @@
                         </select>  
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="date">Data</label>
+                        <input id="date" class="form-control" type="date" formControlName="createdAt"/>
+                    </div>
+                </div>
                                 
                 <div class="modal-footer">
                     <button type="button" id="add-outlayForm" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
@@ -178,6 +185,13 @@
                                 <option [ngValue]="table" [value]="table.category + ' - ' + table.description" selected>{{table.category}} - {{table.description}}</option>
                             }
                         </select>  
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="date">Data</label>
+                        <input id="date" class="form-control" type="date" formControlName="createdAt"/>
                     </div>
                 </div>
                                 
